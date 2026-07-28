@@ -69,7 +69,7 @@ textarea:focus-visible,
   z-index: 30;
   top: 0;
   display: grid;
-  grid-template-columns: 1fr minmax(280px, 600px) 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 28px;
   min-height: 84px;
@@ -80,7 +80,9 @@ textarea:focus-visible,
 
 .search-field {
   display: flex;
-  grid-column: 2;
+  grid-column: 1;
+  width: min(100%, 600px);
+  justify-self: start;
   align-items: center;
   gap: 10px;
   min-height: 46px;
@@ -108,6 +110,33 @@ textarea:focus-visible,
 
 .search-field input::placeholder {
   color: #8c8c8c;
+}
+
+.brand {
+  display: inline-grid;
+  grid-column: 2;
+  width: 120px;
+  height: 64px;
+  place-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-logo-frame {
+  display: grid;
+  width: 120px;
+  height: 64px;
+  place-items: center;
+  overflow: visible;
+}
+
+.brand-logo {
+  display: block;
+  width: 120px;
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
 }
 
 kbd {
@@ -877,19 +906,25 @@ kbd {
   }
 
   .topbar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     gap: 12px;
     padding-block: 12px;
   }
 
   .search-field {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .brand {
     grid-row: 1;
-    grid-column: 1;
+    grid-column: 2;
   }
 
   .topbar > .primary-button {
     grid-row: 1;
-    grid-column: 2;
+    grid-column: 3;
   }
 }
 
@@ -900,6 +935,16 @@ kbd {
 
   .topbar {
     min-height: 72px;
+  }
+
+  .brand,
+  .brand-logo-frame {
+    width: 104px;
+    height: 54px;
+  }
+
+  .brand-logo {
+    width: 104px;
   }
 
   .primary-button {

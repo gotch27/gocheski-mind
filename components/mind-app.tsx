@@ -157,6 +157,12 @@ export function MindApp() {
           )}
         </label>
 
+        <a className="brand" href="#top" aria-label="Gocheski Mind home">
+          <span className="brand-logo-frame" aria-hidden="true">
+            <img className="brand-logo" src={withBasePath("/goch-logo.svg")} alt="" draggable="false" />
+          </span>
+        </a>
+
         <button
           className="primary-button"
           type="button"
