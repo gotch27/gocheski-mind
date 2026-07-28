@@ -12,7 +12,7 @@ import {
   updateInspirationSchema,
   type InspirationIdInput
 } from "@/nextsignal/schemas";
-import type { AppServices } from "@/nextsignal/app";
+import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
 
 export const listInspirationsBusiness = businessProcess<InspirationListInput, Inspiration[], AppServices>({

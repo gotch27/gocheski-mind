@@ -1,13 +1,6 @@
 import { z } from "zod";
 import { inspirationKinds } from "@/lib/inspirations";
 
-// Put shared schemas here when multiple processes or routes use them.
-// The starter uses Zod, but NextSignal only needs the adapter contract.
-// You can replace Zod later without changing process lifecycle semantics.
-export const healthInputSchema = z.object({}).passthrough();
-
-export type HealthInput = z.infer<typeof healthInputSchema>;
-
 const optionalShortText = z.string().trim().max(240).optional();
 const optionalLongText = z.string().trim().max(20_000).optional();
 const optionalUrl = z.string().trim().url().max(2_000).optional();
@@ -69,7 +62,4 @@ export const updateInspirationSchema = z
 
 export const inspirationIdSchema = z.object({ id: z.uuid() });
 
-export type CreateInspirationSchemaInput = z.infer<typeof createInspirationSchema>;
-export type ListInspirationsSchemaInput = z.infer<typeof listInspirationsSchema>;
-export type UpdateInspirationSchemaInput = z.infer<typeof updateInspirationSchema>;
 export type InspirationIdInput = z.infer<typeof inspirationIdSchema>;

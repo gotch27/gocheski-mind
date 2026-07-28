@@ -11,8 +11,7 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "worker": "tsx worker/index.ts"
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "@gotch/nextsignal": "alpha",
@@ -31,7 +30,6 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "drizzle-kit": "^0.31.10",
-    "tsx": "^4.20.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   },

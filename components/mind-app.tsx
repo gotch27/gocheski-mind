@@ -139,12 +139,6 @@ export function MindApp() {
   return (
     <main className="mind-shell" id="top">
       <header className="topbar">
-        <a className="brand" href="#top" aria-label="Gocheski Mind home">
-          <span className="brand-logo-frame" aria-hidden="true">
-            <img className="brand-logo" src={withBasePath("/goch-logo.svg")} alt="" draggable="false" />
-          </span>
-        </a>
-
         <label className="search-field">
           <Search size={18} aria-hidden="true" />
           <input
