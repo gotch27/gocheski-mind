@@ -1,7 +1,7 @@
 import {
-  allowAnonymous,
   apiProcess,
   forwardFault,
+  requireUser,
   systemFail,
   validateWith,
   value
@@ -39,7 +39,7 @@ export const listInspirationsApi = apiProcess<
     owner: "mind",
     version: "0.1.0"
   },
-  auth: allowAnonymous(),
+  auth: requireUser(),
   validate: validateWith(listInspirationsSchema),
   async handle(ctx, input) {
     const normalized: InspirationListInput = {
@@ -69,7 +69,7 @@ export const createInspirationApi = apiProcess<
     owner: "mind",
     version: "0.1.0"
   },
-  auth: allowAnonymous(),
+  auth: requireUser(),
   validate: validateWith(createInspirationSchema),
   async handle(ctx, input) {
     const result = await ctx.mediator.dispatch<CreateInspirationInput, CreateInspirationRecordResult>(
@@ -90,7 +90,7 @@ export const updateInspirationApi = apiProcess<UpdateInspirationInput, { inspira
     owner: "mind",
     version: "0.1.0"
   },
-  auth: allowAnonymous(),
+  auth: requireUser(),
   validate: validateWith(updateInspirationSchema),
   async handle(ctx, input) {
     const result = await ctx.mediator.dispatch<UpdateInspirationInput, Inspiration>(
@@ -111,7 +111,7 @@ export const deleteInspirationApi = apiProcess<InspirationIdInput, { id: string 
     owner: "mind",
     version: "0.1.0"
   },
-  auth: allowAnonymous(),
+  auth: requireUser(),
   validate: validateWith(inspirationIdSchema),
   async handle(ctx, input) {
     const result = await ctx.mediator.dispatch<InspirationIdInput, { id: string }>(

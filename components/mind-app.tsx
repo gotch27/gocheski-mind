@@ -2,6 +2,7 @@
 
 import {
   LoaderCircle,
+  LogOut,
   Plus,
   Search,
   Sparkles,
@@ -34,6 +35,7 @@ export function MindApp() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Inspiration | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -136,6 +138,15 @@ export function MindApp() {
     }
   }
 
+  async function logout() {
+    setLoggingOut(true);
+    try {
+      await fetch(withBasePath("/api/auth/login"), { method: "DELETE" });
+    } finally {
+      window.location.replace(withBasePath("/"));
+    }
+  }
+
   return (
     <main className="mind-shell" id="top">
       <header className="topbar">
@@ -163,17 +174,29 @@ export function MindApp() {
           </span>
         </a>
 
-        <button
-          className="primary-button"
-          type="button"
-          onClick={() => {
-            setEditing(null);
-            setModalOpen(true);
-          }}
-        >
-          <Plus size={18} />
-          <span>Add inspiration</span>
-        </button>
+        <div className="topbar-actions">
+          <button
+            className="primary-button"
+            type="button"
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+          >
+            <Plus size={18} />
+            <span>Add inspiration</span>
+          </button>
+          <button
+            className="logout-button"
+            type="button"
+            onClick={() => void logout()}
+            disabled={loggingOut}
+            aria-label="Log out"
+          >
+            {loggingOut ? <LoaderCircle className="spin" size={17} /> : <LogOut size={17} />}
+            <span>Log out</span>
+          </button>
+        </div>
       </header>
 
       <nav className="filters" aria-label="Filter inspirations">

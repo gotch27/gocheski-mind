@@ -26,7 +26,7 @@ Gocheski Mind is a private inspiration board built with Next.js, `@gotch/nextsig
 ## Conventions
 
 - Keep route handlers thin and bind them with `createNextRoute`.
-- API processes own anonymous access, input validation, and orchestration.
+- API processes own authentication, input validation, and orchestration.
 - Business processes own reusable application behavior.
 - Provider SDKs and database access belong in services, not processes.
 - Return Next Signal result envelopes for expected outcomes.
@@ -36,4 +36,4 @@ Gocheski Mind is a private inspiration board built with Next.js, `@gotch/nextsig
 - Keep TypeScript strict-friendly.
 - Run `npm run check` after TypeScript changes and `npm run build` after larger changes.
 
-The app intentionally has no authentication, background worker, queue, or scheduler. Add those only when the product requires them.
+Authentication uses the same `ADMIN_TOKEN`, `SESSION_SECRET`, and `goch_admin_session` cookie format as `gocheski.com/admin`. Keep that compatibility intact. The app intentionally has no background worker, queue, or scheduler. Add those only when the product requires them.
