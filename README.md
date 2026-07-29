@@ -1,65 +1,88 @@
 # Gocheski Mind
 
-A private visual archive for links, images, and notes. The app is built with Next.js, Next Signal, Neon Postgres, Drizzle, and Vercel Blob.
+A private inspiration board and companion Chrome extension for saving pages, links, selected text, and images.
 
-## What it does
+## Repository
 
-- Captures links and enriches them with titles, descriptions, favicons, and preview images.
-- Uploads images directly from the browser to Vercel Blob.
-- Stores notes, optional personal context, and tags.
-- Presents everything in a responsive visual board.
-- Searches titles, note content, domains, personal notes, and tags.
-- Supports editing, favorites, deletion, URL deduplication, and type filters.
+```text
+apps/
+  web/          Next.js board and capture API
+  extension/    Manifest V3 Chrome extension
+packages/
+  contracts/    Types shared by the web app and extension
+```
 
-## Local setup
+The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob. The extension uses a background service worker and Chrome's context-menu API; it does not inject a content script or request access to every website.
 
-1. Install dependencies:
+## Local web setup
+
+1. Install workspace dependencies:
 
    ```bash
    npm install
    ```
 
-2. Copy `.env.example` to `.env.local` and add:
+2. Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
 
-   - `DATABASE_URL` from Neon.
-   - `BLOB_READ_WRITE_TOKEN` from a public Vercel Blob store.
+   - `DATABASE_URL` — Neon connection string.
+   - `BLOB_READ_WRITE_TOKEN` — token for a public Vercel Blob store.
+   - `ADMIN_TOKEN` — password for the Mind login screen.
+   - `SESSION_SECRET` — secret used to sign the login cookie.
+   - `MIND_EXTENSION_TOKEN` — separate secret accepted only by the extension capture endpoint.
 
-3. Apply the committed Drizzle migration:
+3. Apply the committed database migration and start the app:
 
    ```bash
    npm run db:migrate
-   ```
-
-4. Start the app:
-
-   ```bash
    npm run dev
    ```
 
-## Vercel setup
+## Chrome extension
 
-Connect the repository to Vercel, add the Neon integration or set `DATABASE_URL`, and connect a public Blob store. Vercel adds `BLOB_READ_WRITE_TOKEN` for the selected environments.
+Build the unpacked extension:
 
-Production builds use `/mind` as the default Next.js base path so the app can sit behind a `gocheski.com/mind/:path*` rewrite. Set `NEXT_PUBLIC_BASE_PATH` explicitly if a deployment needs a different path.
+```bash
+npm run build:extension
+```
 
-Run `npm run db:migrate` against the production Neon database before using the deployment.
+Then:
 
-## Architecture
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select `apps/extension/dist`.
+4. Open the extension's **Settings** page and paste the same value used for `MIND_EXTENSION_TOKEN`.
+5. Optionally add comma-separated default tags.
 
-Route-facing work is modeled with Next Signal API processes. Reusable operations live in business processes, while database, metadata, and Blob capabilities live in `nextsignal/services`.
+On macOS, this copies the local token without printing it to the terminal:
 
-The Blob token exchange route is a small infrastructure exception to the standard Next Signal JSON route wrapper. File bytes go directly from the browser to Blob; the resulting URL and pathname are then saved through the normal `inspirations.create` process.
+```bash
+rg '^MIND_EXTENSION_TOKEN=' apps/web/.env.local | cut -d= -f2- | pbcopy
+```
 
-## Privacy note
+Right-click a page, link, text selection, or image and choose **Save to Mind**. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
 
-The first release intentionally has no user accounts or in-app authentication. Anyone who can reach the deployment can read or change its contents, so keep the Vercel deployment private or protect it at the platform level.
+## Vercel
+
+The Vercel project's Root Directory is `apps/web`, with source files outside the root enabled so it can consume `packages/contracts`. Environment variables belong to the existing `gocheski-mind` project.
+
+Production builds use `/mind` as the default Next.js base path. The main `gocheski.com` project proxies `/mind/:path*` to `gocheski-mind.vercel.app/mind/:path*`.
+
+Run `npm run db:migrate` against the production Neon database before using a migration that changes the schema.
+
+## Capture security
+
+The board uses the shared `ADMIN_TOKEN` login and signed `goch_admin_session` cookie. The Chrome extension does not receive that cookie or admin token. It uses `MIND_EXTENSION_TOKEN`, which is accepted only by `POST /api/extension/captures`.
+
+Remote image capture accepts public HTTP(S) JPEG, PNG, WebP, GIF, or AVIF files up to 25 MB. Private network addresses and unsafe redirects are rejected.
 
 ## Commands
 
-- `npm run dev` — local development
-- `npm run check` — TypeScript check
-- `npm test` — unit tests
-- `npm run build` — production build
-- `npm run db:generate` — generate a migration after schema changes
+- `npm run dev` — start the web app
+- `npm run check` — type-check all workspaces
+- `npm test` — run web app tests
+- `npm run build` — build the web app and extension
+- `npm run build:web` — build only the web app
+- `npm run build:extension` — build the unpacked Chrome extension
+- `npm run db:generate` — generate a Drizzle migration
 - `npm run db:migrate` — apply committed migrations
-- `npm run db:push` — push schema changes during local prototyping
+- `npm run db:push` — push schema changes while prototyping

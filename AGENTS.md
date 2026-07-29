@@ -1,27 +1,32 @@
 # Gocheski Mind Agent Guide
 
-Gocheski Mind is a private inspiration board built with Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob.
+Gocheski Mind is a private inspiration board and Chrome extension built with Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob.
 
 ## Commands
 
-- `npm run dev` — start local development
-- `npm run check` — type-check the app
-- `npm test` — run Vitest
-- `npm run build` — create a production build
+- `npm run dev` — start web development
+- `npm run check` — type-check every workspace
+- `npm test` — run Vitest for the web app
+- `npm run build` — build the web app and Chrome extension
+- `npm run build:web` — build only the web app
+- `npm run build:extension` — build the unpacked extension into `apps/extension/dist`
 - `npm run db:generate` — generate a Drizzle migration
 - `npm run db:migrate` — apply committed migrations
 - `npm run db:push` — push schema changes while prototyping
 
 ## Project map
 
-- `app/api/**/route.ts` contains thin Next.js route handlers.
-- `nextsignal/app.ts` composes the Next Signal application.
-- `nextsignal/processes/api/` contains HTTP-facing processes.
-- `nextsignal/processes/business/` contains reusable application processes.
-- `nextsignal/services/` contains database, Blob, and link-metadata integrations.
-- `nextsignal/config.ts` is the centralized environment configuration boundary.
-- `db/` contains the Drizzle client and schema.
-- `drizzle/` contains committed migrations.
+- `apps/web/` contains the Next.js application.
+- `apps/web/app/api/**/route.ts` contains thin Next.js route handlers.
+- `apps/web/nextsignal/app.ts` composes the Next Signal application.
+- `apps/web/nextsignal/processes/api/` contains HTTP-facing processes.
+- `apps/web/nextsignal/processes/business/` contains reusable application processes.
+- `apps/web/nextsignal/services/` contains database, Blob, and link-metadata integrations.
+- `apps/web/nextsignal/config.ts` is the centralized environment configuration boundary.
+- `apps/web/db/` contains the Drizzle client and schema.
+- `apps/web/drizzle/` contains committed migrations.
+- `apps/extension/` contains the Manifest V3 extension source and build script.
+- `packages/contracts/` contains request and response types shared across browser and server.
 
 ## Conventions
 
@@ -31,9 +36,12 @@ Gocheski Mind is a private inspiration board built with Next.js, `@gotch/nextsig
 - Provider SDKs and database access belong in services, not processes.
 - Return Next Signal result envelopes for expected outcomes.
 - Use `forwardFault` when forwarding a failed mediator result.
-- Use `validateWith` with schemas from `nextsignal/schemas.ts`.
-- Use the `@/` import alias.
+- Use `validateWith` with schemas from `apps/web/nextsignal/schemas.ts`.
+- Use the `@/` import alias inside the web app.
 - Keep TypeScript strict-friendly.
+- Keep the extension content-script-free unless a future feature genuinely requires page access.
 - Run `npm run check` after TypeScript changes and `npm run build` after larger changes.
 
-Authentication uses the same `ADMIN_TOKEN`, `SESSION_SECRET`, and `goch_admin_session` cookie format as `gocheski.com/admin`. Keep that compatibility intact. The app intentionally has no background worker, queue, or scheduler. Add those only when the product requires them.
+The web app uses the same `ADMIN_TOKEN`, `SESSION_SECRET`, and `goch_admin_session` cookie format as `gocheski.com/admin`. The extension uses a separate `MIND_EXTENSION_TOKEN` that only authorizes new captures. Keep those trust boundaries intact.
+
+The app intentionally has no background worker, queue, or scheduler. Add those only when the product requires them.

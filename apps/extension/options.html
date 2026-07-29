@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gocheski Mind settings</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="options-page">
+    <main class="options-card">
+      <a href="https://www.gocheski.com/mind" target="_blank" rel="noreferrer">Open Mind</a>
+      <h1>Extension settings</h1>
+      <p class="intro">Connect this browser once, then save inspirations directly from the right-click menu.</p>
+      <form data-settings-form>
+        <label>
+          Extension token
+          <input data-token type="password" autocomplete="off" required />
+          <small>Stored only in this Chrome extension and used solely for new captures.</small>
+        </label>
+        <label>
+          Default tags <span>optional</span>
+          <input data-tags type="text" placeholder="chrome, inspiration" />
+          <small>Comma-separated. These tags are added to every right-click capture.</small>
+        </label>
+        <button class="primary" type="submit">Save settings</button>
+        <p class="form-message" data-message aria-live="polite"></p>
+      </form>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>
