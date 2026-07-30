@@ -1,7 +1,7 @@
 "use client";
 
 import { upload } from "@vercel/blob/client";
-import { LoaderCircle, Upload, X } from "lucide-react";
+import { ArrowUpRight, LoaderCircle, Pencil, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import type { ApiResult, Inspiration, InspirationKind } from "@/lib/inspirations";
 import { readApiError } from "@/lib/api";
@@ -27,6 +27,7 @@ export function CaptureModal({ open, initial, onClose, onSaved }: CaptureModalPr
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [editingSourceUrl, setEditingSourceUrl] = useState(false);
   const [note, setNote] = useState("");
   const [tags, setTags] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -41,6 +42,7 @@ export function CaptureModal({ open, initial, onClose, onSaved }: CaptureModalPr
     setTitle(initial?.title ?? "");
     setContent(initial?.content ?? "");
     setSourceUrl(initial?.sourceUrl ?? "");
+    setEditingSourceUrl(false);
     setNote(initial?.note ?? "");
     setTags(initial?.tags.join(", ") ?? "");
     setFile(null);
@@ -183,17 +185,44 @@ export function CaptureModal({ open, initial, onClose, onSaved }: CaptureModalPr
 
         <form className="capture-form" onSubmit={submit}>
           {tab === "link" ? (
-            <label className="field wide-field">
+            <div className="field wide-field">
               <span>URL</span>
-              <input
-                type="url"
-                value={sourceUrl}
-                onChange={(event) => setSourceUrl(event.target.value)}
-                placeholder="Paste a link"
-                required
-                autoFocus
-              />
-            </label>
+              {initial && sourceUrl && !editingSourceUrl ? (
+                <div className="saved-url-row">
+                  <a className="saved-url-link" href={sourceUrl} target="_blank" rel="noreferrer" title={sourceUrl}>
+                    <span>{sourceUrl}</span>
+                    <ArrowUpRight size={16} aria-hidden="true" />
+                  </a>
+                  <button className="url-edit-button" type="button" onClick={() => setEditingSourceUrl(true)}>
+                    <Pencil size={14} aria-hidden="true" />
+                    Edit
+                  </button>
+                </div>
+              ) : (
+                <div className="url-editor-row">
+                  <input
+                    type="url"
+                    value={sourceUrl}
+                    onChange={(event) => setSourceUrl(event.target.value)}
+                    placeholder="Paste a link"
+                    required
+                    autoFocus
+                  />
+                  {initial ? (
+                    <button
+                      className="url-edit-button"
+                      type="button"
+                      onClick={() => {
+                        setSourceUrl(initial.sourceUrl ?? "");
+                        setEditingSourceUrl(false);
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  ) : null}
+                </div>
+              )}
+            </div>
           ) : null}
 
           {tab === "image" && !initial ? (

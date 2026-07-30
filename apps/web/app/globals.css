@@ -385,19 +385,6 @@ kbd {
   transform: translateY(-2px);
 }
 
-.card-link-overlay {
-  position: absolute;
-  z-index: 1;
-  border-radius: inherit;
-  cursor: pointer;
-  inset: 0;
-}
-
-.card-link-overlay:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: -3px;
-}
-
 .inspiration-card.kind-note {
   background: #fffbea;
 }
@@ -466,6 +453,13 @@ kbd {
   line-height: 1.16;
 }
 
+.kind-link .card-copy h2 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 .card-copy p {
   display: -webkit-box;
   margin: 11px 0 0;
@@ -475,6 +469,10 @@ kbd {
   line-height: 1.58;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 5;
+}
+
+.kind-link .card-copy p:not(.personal-note) {
+  -webkit-line-clamp: 2;
 }
 
 .kind-note .card-copy p {
@@ -565,8 +563,6 @@ kbd {
 }
 
 .card-actions {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -761,6 +757,67 @@ kbd {
 .field input::placeholder,
 .field textarea::placeholder {
   color: #969696;
+}
+
+.saved-url-row,
+.url-editor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.saved-url-link {
+  display: flex;
+  min-width: 0;
+  height: 46px;
+  padding: 0 13px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  overflow: hidden;
+  color: var(--ink);
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  background: #fafafa;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.saved-url-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saved-url-link svg {
+  flex: 0 0 auto;
+}
+
+.saved-url-link:hover,
+.saved-url-link:focus-visible {
+  border-color: var(--ink);
+  background: white;
+}
+
+.url-edit-button {
+  display: inline-flex;
+  height: 46px;
+  padding: 0 13px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink);
+  border: 1px solid #c8c8c8;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.url-edit-button:hover {
+  border-color: var(--ink);
 }
 
 .field small,

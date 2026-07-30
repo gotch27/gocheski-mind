@@ -12,33 +12,18 @@ type InspirationCardProps = {
 
 export function InspirationCard({ item, onEdit, onFavorite, onDelete }: InspirationCardProps) {
   const isVisual = Boolean(item.imageUrl);
-  const linkDestination = item.kind === "link" ? item.sourceUrl : null;
   const displayTitle = item.title || item.domain || (item.kind === "note" ? "Untitled note" : "Saved inspiration");
+  const description = !item.content && item.metadata.description && !isRepeatedDescription(displayTitle, item.metadata.description)
+    ? item.metadata.description
+    : null;
 
   return (
     <article className={`inspiration-card kind-${item.kind}`}>
-      {linkDestination ? (
-        <a
-          className="card-link-overlay"
-          href={linkDestination}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Open ${displayTitle}`}
-        />
-      ) : null}
-
       {isVisual ? (
-        linkDestination ? (
-          <div className="card-image-button">
-            {/* Blob and source preview URLs are intentionally rendered directly. */}
-            <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
-          </div>
-        ) : (
-          <button className="card-image-button" type="button" onClick={onEdit} aria-label={`Edit ${displayTitle}`}>
-            {/* Blob and source preview URLs are intentionally rendered directly. */}
-            <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
-          </button>
-        )
+        <button className="card-image-button" type="button" onClick={onEdit} aria-label={`Open ${displayTitle}`}>
+          {/* Blob and source preview URLs are intentionally rendered directly. */}
+          <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
+        </button>
       ) : null}
 
       <div className={isVisual ? "card-body compact" : "card-body"}>
@@ -50,11 +35,10 @@ export function InspirationCard({ item, onEdit, onFavorite, onDelete }: Inspirat
         {item.kind === "quote" ? <span className="quote-mark">“</span> : null}
         <div
           className="card-copy"
-          role={linkDestination ? undefined : "button"}
-          tabIndex={linkDestination ? undefined : 0}
-          onClick={linkDestination ? undefined : onEdit}
+          role="button"
+          tabIndex={0}
+          onClick={onEdit}
           onKeyDown={(event) => {
-            if (linkDestination) return;
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
               onEdit();
@@ -63,7 +47,7 @@ export function InspirationCard({ item, onEdit, onFavorite, onDelete }: Inspirat
         >
           <h2>{displayTitle}</h2>
           {item.content ? <p className={item.kind === "quote" ? "quote-copy" : undefined}>{item.content}</p> : null}
-          {!item.content && item.metadata.description ? <p>{item.metadata.description}</p> : null}
+          {description ? <p>{description}</p> : null}
           {item.note ? <p className="personal-note">{item.note}</p> : null}
         </div>
 
@@ -120,4 +104,21 @@ function formatDate(value: string) {
   const today = new Date();
   if (date.toDateString() === today.toDateString()) return "Today";
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
+}
+
+function isRepeatedDescription(title: string, description: string) {
+  const normalizedTitle = normalizeComparisonText(title);
+  const normalizedDescription = normalizeComparisonText(description);
+  const comparableExcerpt = normalizedDescription.slice(0, 80).trim();
+  return comparableExcerpt.length >= 30 && normalizedTitle.includes(comparableExcerpt);
+}
+
+function normalizeComparisonText(value: string) {
+  return value
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
