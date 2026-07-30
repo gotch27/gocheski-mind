@@ -309,9 +309,11 @@ kbd {
 }
 
 .label-filters {
+  width: 66.666%;
   min-width: 0;
   padding: 3px 1px;
   overflow-x: auto;
+  justify-self: end;
   scrollbar-color: #c7c7c7 transparent;
   scrollbar-width: thin;
 }
@@ -1164,6 +1166,10 @@ kbd {
 
   .label-filter-track {
     justify-content: flex-start;
+  }
+
+  .label-filters {
+    width: 100%;
   }
 }
 
