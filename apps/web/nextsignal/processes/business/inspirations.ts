@@ -30,6 +30,21 @@ export const listInspirationsBusiness = businessProcess<InspirationListInput, In
   }
 });
 
+export const listInspirationLabelsBusiness = businessProcess<Record<string, never>, string[], AppServices>({
+  name: "inspirations.listLabelsBusiness",
+  metadata: {
+    description: "Lists labels that are attached to saved inspirations.",
+    tags: ["inspirations", "labels"],
+    owner: "mind",
+    version: "0.1.0"
+  },
+  auth: () => ok(),
+  validate: () => ok(),
+  async handle(ctx) {
+    return value(await ctx.services.inspirations.listLabels());
+  }
+});
+
 export const createInspirationBusiness = businessProcess<
   CreateInspirationInput,
   CreateInspirationRecordResult,

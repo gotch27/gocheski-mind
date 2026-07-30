@@ -8,6 +8,7 @@ import { captureFromExtensionApi } from "@/nextsignal/processes/api/extension-ca
 import {
   createInspirationBusiness,
   deleteInspirationBusiness,
+  listInspirationLabelsBusiness,
   listInspirationsBusiness,
   updateInspirationBusiness
 } from "@/nextsignal/processes/business/inspirations";
@@ -20,6 +21,7 @@ export const processes = [
   updateInspirationApi,
   deleteInspirationApi,
   captureFromExtensionBusiness,
+  listInspirationLabelsBusiness,
   listInspirationsBusiness,
   createInspirationBusiness,
   updateInspirationBusiness,

@@ -29,7 +29,7 @@ type ListInspirationsTransportInput = Omit<InspirationListInput, "favorite" | "l
 
 export const listInspirationsApi = apiProcess<
   ListInspirationsTransportInput,
-  { items: Inspiration[] },
+  { items: Inspiration[]; labels: string[] },
   AppServices
 >({
   name: "inspirations.list",
@@ -46,14 +46,16 @@ export const listInspirationsApi = apiProcess<
       query: input.query,
       kind: input.kind,
       favorite: input.favorite === undefined ? undefined : input.favorite === true || input.favorite === "true",
+      tag: input.tag,
       limit: input.limit === undefined ? 80 : Number(input.limit)
     };
-    const result = await ctx.mediator.dispatch<InspirationListInput, Inspiration[]>(
-      "inspirations.listBusiness",
-      normalized
-    );
-    if (!result.ok) return forwardFault(result);
-    return value({ items: result.data ?? [] });
+    const [itemsResult, labelsResult] = await Promise.all([
+      ctx.mediator.dispatch<InspirationListInput, Inspiration[]>("inspirations.listBusiness", normalized),
+      ctx.mediator.dispatch<Record<string, never>, string[]>("inspirations.listLabelsBusiness", {})
+    ]);
+    if (!itemsResult.ok) return forwardFault(itemsResult);
+    if (!labelsResult.ok) return forwardFault(labelsResult);
+    return value({ items: itemsResult.data ?? [], labels: labelsResult.data ?? [] });
   }
 });
 

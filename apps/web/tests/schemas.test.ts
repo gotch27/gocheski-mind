@@ -55,6 +55,6 @@ describe("listInspirationsSchema", () => {
   });
 
   it("accepts normalized values during mediator dispatch", () => {
-    expect(listInspirationsSchema.safeParse({ favorite: true, limit: 40 }).success).toBe(true);
+    expect(listInspirationsSchema.safeParse({ favorite: true, tag: "design", limit: 40 }).success).toBe(true);
   });
 });

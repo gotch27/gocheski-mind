@@ -267,10 +267,17 @@ kbd {
   text-transform: uppercase;
 }
 
+.filter-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 70px);
+  margin: 22px 0 30px;
+  align-items: center;
+}
+
 .filters {
   display: flex;
   gap: clamp(18px, 2.3vw, 34px);
-  margin: 22px 0 30px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -299,6 +306,49 @@ kbd {
 .filter-chip:hover,
 .filter-chip.active {
   color: var(--ink);
+}
+
+.label-filters {
+  min-width: 0;
+  padding: 3px 1px;
+  overflow-x: auto;
+  scrollbar-color: #c7c7c7 transparent;
+  scrollbar-width: thin;
+}
+
+.label-filter-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.label-chip {
+  display: inline-flex;
+  min-height: 30px;
+  padding: 0 11px;
+  align-items: center;
+  color: var(--muted-dark);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.label-chip:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.label-chip.active {
+  color: white;
+  border-color: var(--ink);
+  background: var(--ink);
 }
 
 .loading-state {
@@ -1106,6 +1156,15 @@ kbd {
     grid-row: 1;
     grid-column: 3;
   }
+
+  .filter-bar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .label-filter-track {
+    justify-content: flex-start;
+  }
 }
 
 @media (max-width: 620px) {
@@ -1141,7 +1200,7 @@ kbd {
     padding-inline: 12px;
   }
 
-  .filters {
+  .filter-bar {
     margin-top: 20px;
     margin-bottom: 20px;
   }

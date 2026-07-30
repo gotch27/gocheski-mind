@@ -54,6 +54,7 @@ export type InspirationListInput = {
   query?: string;
   kind?: InspirationKind;
   favorite?: boolean;
+  tag?: string;
   limit?: number;
 };
 

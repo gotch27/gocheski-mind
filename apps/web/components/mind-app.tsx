@@ -28,7 +28,9 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
 
 export function MindApp() {
   const [items, setItems] = useState<Inspiration[]>([]);
+  const [labels, setLabels] = useState<string[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -52,19 +54,21 @@ export function MindApp() {
     if (debouncedQuery) parameters.set("query", debouncedQuery);
     if (filter === "favorite") parameters.set("favorite", "true");
     else if (filter !== "all") parameters.set("kind", filter);
+    if (selectedLabel) parameters.set("tag", selectedLabel);
 
     try {
       const response = await fetch(withBasePath(`/api/inspirations?${parameters}`), { signal, cache: "no-store" });
-      const result = (await response.json()) as ApiResult<{ items: Inspiration[] }>;
+      const result = (await response.json()) as ApiResult<{ items: Inspiration[]; labels: string[] }>;
       if (!response.ok || !result.ok) throw new Error(readApiError(result));
       setItems(result.data?.items ?? []);
+      setLabels(result.data?.labels ?? []);
     } catch (cause) {
       if (cause instanceof DOMException && cause.name === "AbortError") return;
       setError("Your archive could not be loaded. Check the Neon connection and try again.");
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, filter]);
+  }, [debouncedQuery, filter, selectedLabel]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -101,6 +105,7 @@ export function MindApp() {
       const exists = current.some((item) => item.id === saved.id);
       return exists ? current.map((item) => (item.id === saved.id ? saved : item)) : [saved, ...current];
     });
+    setLabels((current) => [...new Set([...current, ...saved.tags])].sort((left, right) => left.localeCompare(right)));
     setToast(message);
     setEditing(null);
     setModalOpen(false);
@@ -200,19 +205,39 @@ export function MindApp() {
         </div>
       </header>
 
-      <nav className="filters" aria-label="Filter inspirations">
-        {FILTERS.map(({ value, label }) => (
-          <button
-            key={value}
-            className={filter === value ? "filter-chip active" : "filter-chip"}
-            type="button"
-            onClick={() => setFilter(value)}
-            aria-pressed={filter === value}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
+      <div className="filter-bar">
+        <nav className="filters" aria-label="Filter inspirations by category">
+          {FILTERS.map(({ value, label }) => (
+            <button
+              key={value}
+              className={filter === value ? "filter-chip active" : "filter-chip"}
+              type="button"
+              onClick={() => setFilter(value)}
+              aria-pressed={filter === value}
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {labels.length ? (
+          <nav className="label-filters" aria-label="Filter inspirations by label">
+            <div className="label-filter-track">
+              {labels.map((label) => (
+                <button
+                  key={label}
+                  className={selectedLabel === label ? "label-chip active" : "label-chip"}
+                  type="button"
+                  onClick={() => setSelectedLabel((current) => current === label ? null : label)}
+                  aria-pressed={selectedLabel === label}
+                >
+                  #{label}
+                </button>
+              ))}
+            </div>
+          </nav>
+        ) : null}
+      </div>
 
       {loading ? (
         <div className="loading-state" role="status">
@@ -231,19 +256,20 @@ export function MindApp() {
       ) : items.length === 0 ? (
         <section className="empty-state">
           <span className="empty-symbol"><Sparkles size={28} /></span>
-          <h2>{query || filter !== "all" ? "Nothing matches that thought" : "Your mind has room"}</h2>
+          <h2>{query || filter !== "all" || selectedLabel ? "Nothing matches that thought" : "Your mind has room"}</h2>
           <p>
-            {query || filter !== "all"
+            {query || filter !== "all" || selectedLabel
               ? "Try another word or return to everything."
               : "Start with a link, an image, or a note you want to meet again."}
           </p>
-          {query || filter !== "all" ? (
+          {query || filter !== "all" || selectedLabel ? (
             <button
               className="secondary-button"
               type="button"
               onClick={() => {
                 setQuery("");
                 setFilter("all");
+                setSelectedLabel(null);
               }}
             >
               Show everything

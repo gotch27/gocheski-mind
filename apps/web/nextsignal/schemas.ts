@@ -66,6 +66,7 @@ export const listInspirationsSchema = z.object({
   query: z.string().trim().max(160).optional(),
   kind: z.enum(inspirationKinds).optional(),
   favorite: z.union([z.boolean(), z.enum(["true", "false"])]).optional(),
+  tag: z.string().trim().min(1).max(40).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(80)
 });
 

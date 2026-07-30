@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { getDatabase } from "@/db";
 import { inspirationTags, inspirations, tags as tagsTable } from "@/db/schema";
 import type {
@@ -21,6 +21,16 @@ export const inspirationService = {
 
     if (input.kind) conditions.push(eq(inspirations.kind, input.kind));
     if (input.favorite !== undefined) conditions.push(eq(inspirations.favorite, input.favorite));
+
+    if (input.tag) {
+      const matchingTags = await db
+        .select({ id: inspirationTags.inspirationId })
+        .from(inspirationTags)
+        .innerJoin(tagsTable, eq(tagsTable.id, inspirationTags.tagId))
+        .where(eq(tagsTable.name, input.tag));
+      if (matchingTags.length === 0) return [];
+      conditions.push(inArray(inspirations.id, matchingTags.map((row) => row.id)));
+    }
 
     if (input.query) {
       const pattern = `%${input.query}%`;
@@ -51,6 +61,16 @@ export const inspirationService = {
 
     const tagMap = await readTagMap(rows.map((row) => row.id));
     return rows.map((row) => toInspiration(row, tagMap.get(row.id) ?? []));
+  },
+
+  async listLabels(): Promise<string[]> {
+    const db = await getDatabase();
+    const rows = await db
+      .selectDistinct({ name: tagsTable.name })
+      .from(tagsTable)
+      .innerJoin(inspirationTags, eq(inspirationTags.tagId, tagsTable.id))
+      .orderBy(asc(tagsTable.name));
+    return rows.map((row) => row.name);
   },
 
   async create(input: CreateInspirationInput): Promise<CreateInspirationRecordResult> {
