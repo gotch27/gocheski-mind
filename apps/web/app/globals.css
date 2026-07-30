@@ -385,6 +385,19 @@ kbd {
   transform: translateY(-2px);
 }
 
+.card-link-overlay {
+  position: absolute;
+  z-index: 1;
+  border-radius: inherit;
+  cursor: pointer;
+  inset: 0;
+}
+
+.card-link-overlay:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -3px;
+}
+
 .inspiration-card.kind-note {
   background: #fffbea;
 }
@@ -552,6 +565,8 @@ kbd {
 }
 
 .card-actions {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex: 0 0 auto;
   align-items: center;

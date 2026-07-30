@@ -1,5 +1,5 @@
 import type { ExtensionCaptureInput, ExtensionCaptureResponse } from "@gocheski-mind/contracts";
-import { API_BASE_URL, BOARD_URL, readSettings } from "./settings";
+import { API_BASE_URL, readSettings } from "./settings";
 
 const MENU_ID = "save-to-gocheski-mind";
 
@@ -9,6 +9,8 @@ type ApiEnvelope<T> = {
   errors?: Array<{ message?: string; publicMessage?: string }>;
 };
 
+type ToastTone = "loading" | "success" | "neutral" | "error";
+
 chrome.runtime.onInstalled.addListener(() => {
   void configureExtension();
 });
@@ -16,10 +18,6 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   void captureFromContextMenu(info, tab);
-});
-
-chrome.notifications.onClicked.addListener(() => {
-  void chrome.tabs.create({ url: BOARD_URL });
 });
 
 async function configureExtension() {
@@ -36,12 +34,13 @@ async function captureFromContextMenu(info: chrome.contextMenus.OnClickData, tab
   try {
     const settings = await readSettings();
     if (!settings.token) {
-      await notify("Connect the extension first", "Open the extension settings and paste your Mind extension token.");
+      await showToast(tab?.id, "error", "Connect Mind first", "Open the extension settings and paste your token.");
       await chrome.runtime.openOptionsPage();
       return;
     }
 
     const input = toCaptureInput(info, tab, settings.defaultTags);
+    await showToast(tab?.id, "loading", "Saving to Mind…", captureLabel(input.type));
     const response = await fetch(`${API_BASE_URL}/api/extension/captures`, {
       method: "POST",
       headers: {
@@ -60,12 +59,19 @@ async function captureFromContextMenu(info: chrome.contextMenus.OnClickData, tab
     }
 
     const label = result.data.inspiration.title?.trim() || captureLabel(input.type);
-    await notify(
+    await showToast(
+      tab?.id,
+      result.data.duplicate ? "neutral" : "success",
       result.data.duplicate ? "Already in Mind" : "Saved to Mind",
       truncate(label, 120)
     );
   } catch (error) {
-    await notify("Mind could not save this", error instanceof Error ? truncate(error.message, 180) : "Try again.");
+    await showToast(
+      tab?.id,
+      "error",
+      "Mind could not save this",
+      error instanceof Error ? truncate(error.message, 180) : "Try again."
+    );
   }
 }
 
@@ -81,7 +87,7 @@ function toCaptureInput(
 
   const common = {
     pageUrl,
-    pageTitle: tab?.title,
+    pageTitle: tab?.title ? truncate(tab.title.trim(), 240) : undefined,
     tags
   };
 
@@ -117,14 +123,144 @@ function captureLabel(type: ExtensionCaptureInput["type"]) {
 }
 
 function truncate(value: string, maximum: number) {
-  return value.length > maximum ? `${value.slice(0, maximum - 1)}…` : value;
+  if (value.length <= maximum) return value;
+
+  let end = maximum - 1;
+  const previousCodeUnit = value.charCodeAt(end - 1);
+  const nextCodeUnit = value.charCodeAt(end);
+  if (
+    previousCodeUnit >= 0xd800 && previousCodeUnit <= 0xdbff &&
+    nextCodeUnit >= 0xdc00 && nextCodeUnit <= 0xdfff
+  ) {
+    end -= 1;
+  }
+  return `${value.slice(0, end)}…`;
 }
 
-async function notify(title: string, message: string) {
-  await chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icons/icon-128.png",
-    title,
-    message
-  });
+async function showToast(tabId: number | undefined, tone: ToastTone, title: string, message: string) {
+  if (tabId === undefined) return;
+
+  try {
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      func: renderMindToast,
+      args: [tone, title, message]
+    });
+  } catch {
+    // Chrome prevents injection on internal pages and the Web Store. Capturing
+    // those URLs is unsupported too, so there is no useful fallback to render.
+  }
+}
+
+function renderMindToast(tone: ToastTone, title: string, message: string) {
+  const hostId = "__gocheski-mind-toast";
+  let host = document.getElementById(hostId) as HTMLElement | null;
+
+  if (!host) {
+    host = document.createElement("div");
+    host.id = hostId;
+    document.documentElement.append(host);
+  }
+
+  const existingTimer = Number(host.dataset.dismissTimer);
+  if (existingTimer) window.clearTimeout(existingTimer);
+
+  const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
+  const palette = {
+    loading: { surface: "#101010", accent: "#ffffff", icon: "…" },
+    success: { surface: "#101010", accent: "#58b368", icon: "✓" },
+    neutral: { surface: "#4f535b", accent: "#ffffff", icon: "✓" },
+    error: { surface: "#b42318", accent: "#ffffff", icon: "!" }
+  }[tone];
+
+  const style = document.createElement("style");
+  style.textContent = `
+    :host {
+      all: initial !important;
+      position: fixed !important;
+      right: 22px !important;
+      bottom: 22px !important;
+      z-index: 2147483647 !important;
+      pointer-events: none !important;
+    }
+    .toast {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 11px;
+      width: min(340px, calc(100vw - 44px));
+      padding: 14px 16px;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 9px;
+      background: ${palette.surface};
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      animation: mind-toast-in 180ms ease-out;
+    }
+    .mark {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      color: ${palette.surface};
+      border-radius: 50%;
+      background: ${palette.accent};
+      place-items: center;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .copy { min-width: 0; }
+    strong {
+      display: block;
+      margin: 0 0 3px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+    p {
+      overflow: hidden;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 1.45;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @keyframes mind-toast-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 520px) {
+      :host { right: 12px !important; bottom: 12px !important; }
+      .toast { width: calc(100vw - 24px); }
+    }
+  `;
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.setAttribute("role", tone === "error" ? "alert" : "status");
+
+  const mark = document.createElement("span");
+  mark.className = "mark";
+  mark.textContent = palette.icon;
+
+  const copy = document.createElement("div");
+  copy.className = "copy";
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  const detail = document.createElement("p");
+  detail.textContent = message;
+  copy.append(heading, detail);
+  toast.append(mark, copy);
+  shadow.replaceChildren(style, toast);
+
+  if (tone !== "loading") {
+    const duration = tone === "error" ? 6_000 : 4_000;
+    const timer = window.setTimeout(() => host?.remove(), duration);
+    host.dataset.dismissTimer = String(timer);
+  }
 }

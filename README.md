@@ -12,7 +12,7 @@ packages/
   contracts/    Types shared by the web app and extension
 ```
 
-The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob. The extension uses a background service worker and Chrome's context-menu API; it does not inject a content script or request access to every website.
+The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob. The extension uses a background service worker and Chrome's context-menu API. It has no always-running content script or access to every website; it injects only a temporary status toast after an explicit capture action.
 
 ## Local web setup
 
@@ -59,7 +59,7 @@ On macOS, this copies the local token without printing it to the terminal:
 rg '^MIND_EXTENSION_TOKEN=' apps/web/.env.local | cut -d= -f2- | pbcopy
 ```
 
-Right-click a page, link, text selection, or image and choose **Save to Mind**. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
+Right-click a page, link, text selection, or image and choose **Save to Mind**. A temporary toast on the current page reports saving, success, duplicate, or error status. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
 
 ## Vercel
 

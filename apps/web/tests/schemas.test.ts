@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { maximumInspirationTitleLength, normalizeInspirationTitle } from "@/lib/inspirations";
 import { createInspirationSchema, extensionCaptureSchema, listInspirationsSchema } from "@/nextsignal/schemas";
 
 describe("extensionCaptureSchema", () => {
@@ -19,6 +20,16 @@ describe("extensionCaptureSchema", () => {
 
   it("rejects non-web page URLs", () => {
     expect(extensionCaptureSchema.safeParse({ type: "page", pageUrl: "chrome://extensions" }).success).toBe(false);
+  });
+
+  it("accepts a long browser title so the capture process can normalize it", () => {
+    const pageTitle = "A long social post ".repeat(30);
+    expect(extensionCaptureSchema.safeParse({ type: "page", pageUrl: "https://x.com/post", pageTitle }).success)
+      .toBe(true);
+
+    const normalized = normalizeInspirationTitle(pageTitle);
+    expect(normalized).toHaveLength(maximumInspirationTitleLength);
+    expect(normalized?.endsWith("…")).toBe(true);
   });
 });
 

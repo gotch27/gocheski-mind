@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { extensionCaptureTypes } from "@gocheski-mind/contracts";
-import { inspirationKinds } from "@/lib/inspirations";
+import { inspirationKinds, maximumInspirationTitleLength } from "@/lib/inspirations";
 
-const optionalShortText = z.string().trim().max(240).optional();
+const optionalShortText = z.string().trim().max(maximumInspirationTitleLength).optional();
 const optionalLongText = z.string().trim().max(20_000).optional();
 const optionalUrl = z.string().trim().url().max(2_000).optional();
 const tagsSchema = z.array(z.string().trim().min(1).max(40)).max(12).optional();
@@ -17,7 +17,7 @@ export const extensionCaptureSchema = z
     pageUrl: webUrl,
     targetUrl: webUrl.optional(),
     text: z.string().trim().min(1).max(20_000).optional(),
-    pageTitle: optionalShortText,
+    pageTitle: z.string().trim().max(20_000).optional(),
     tags: tagsSchema
   })
   .superRefine((input, context) => {

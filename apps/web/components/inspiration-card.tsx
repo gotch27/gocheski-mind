@@ -12,15 +12,33 @@ type InspirationCardProps = {
 
 export function InspirationCard({ item, onEdit, onFavorite, onDelete }: InspirationCardProps) {
   const isVisual = Boolean(item.imageUrl);
+  const linkDestination = item.kind === "link" ? item.sourceUrl : null;
   const displayTitle = item.title || item.domain || (item.kind === "note" ? "Untitled note" : "Saved inspiration");
 
   return (
     <article className={`inspiration-card kind-${item.kind}`}>
+      {linkDestination ? (
+        <a
+          className="card-link-overlay"
+          href={linkDestination}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open ${displayTitle}`}
+        />
+      ) : null}
+
       {isVisual ? (
-        <button className="card-image-button" type="button" onClick={onEdit} aria-label={`Edit ${displayTitle}`}>
-          {/* Blob and source preview URLs are intentionally rendered directly. */}
-          <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
-        </button>
+        linkDestination ? (
+          <div className="card-image-button">
+            {/* Blob and source preview URLs are intentionally rendered directly. */}
+            <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
+          </div>
+        ) : (
+          <button className="card-image-button" type="button" onClick={onEdit} aria-label={`Edit ${displayTitle}`}>
+            {/* Blob and source preview URLs are intentionally rendered directly. */}
+            <img className="card-image" src={item.imageUrl!} alt={item.title || "Saved inspiration"} loading="lazy" />
+          </button>
+        )
       ) : null}
 
       <div className={isVisual ? "card-body compact" : "card-body"}>
@@ -32,10 +50,11 @@ export function InspirationCard({ item, onEdit, onFavorite, onDelete }: Inspirat
         {item.kind === "quote" ? <span className="quote-mark">“</span> : null}
         <div
           className="card-copy"
-          role="button"
-          tabIndex={0}
-          onClick={onEdit}
+          role={linkDestination ? undefined : "button"}
+          tabIndex={linkDestination ? undefined : 0}
+          onClick={linkDestination ? undefined : onEdit}
           onKeyDown={(event) => {
+            if (linkDestination) return;
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();
               onEdit();

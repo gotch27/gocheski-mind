@@ -1,6 +1,6 @@
 import { businessProcess, forwardFault, ok, systemFail, validateWith, value } from "@gotch/nextsignal";
 import type { ExtensionCaptureInput } from "@gocheski-mind/contracts";
-import type { CreateInspirationInput } from "@/lib/inspirations";
+import { normalizeInspirationTitle, type CreateInspirationInput } from "@/lib/inspirations";
 import { extensionCaptureSchema } from "@/nextsignal/schemas";
 import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
@@ -32,7 +32,7 @@ export const captureFromExtensionBusiness = businessProcess<
 });
 
 async function toCreateInput(services: AppServices, input: ExtensionCaptureInput): Promise<CreateInspirationInput> {
-  const title = cleanOptional(input.pageTitle);
+  const title = normalizeInspirationTitle(input.pageTitle);
   const tags = input.tags ?? [];
 
   switch (input.type) {
@@ -55,8 +55,4 @@ async function toCreateInput(services: AppServices, input: ExtensionCaptureInput
       };
     }
   }
-}
-
-function cleanOptional(value: string | undefined) {
-  return value?.trim() || undefined;
 }

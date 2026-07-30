@@ -39,7 +39,7 @@ Gocheski Mind is a private inspiration board and Chrome extension built with Nex
 - Use `validateWith` with schemas from `apps/web/nextsignal/schemas.ts`.
 - Use the `@/` import alias inside the web app.
 - Keep TypeScript strict-friendly.
-- Keep the extension content-script-free unless a future feature genuinely requires page access.
+- Keep the extension free of always-running content scripts. Its scripting permission is limited to injecting a temporary toast after an explicit context-menu capture.
 - Run `npm run check` after TypeScript changes and `npm run build` after larger changes.
 
 The web app uses the same `ADMIN_TOKEN`, `SESSION_SECRET`, and `goch_admin_session` cookie format as `gocheski.com/admin`. The extension uses a separate `MIND_EXTENSION_TOKEN` that only authorizes new captures. Keep those trust boundaries intact.
