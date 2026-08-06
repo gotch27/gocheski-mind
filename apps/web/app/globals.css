@@ -2,14 +2,16 @@
   --background: #ffffff;
   --surface: #ffffff;
   --soft: #f5f5f5;
-  --ink: #050505;
+  --ink: #111111;
+  --accent: #ff6b00;
+  --accent-soft: #fff3eb;
   --muted: #65728d;
   --muted-dark: #5f5f5f;
   --line: #d8d8d8;
   --line-dark: #111111;
   --favorite: #e5484d;
   --favorite-soft: #fff0f1;
-  --overlay: rgba(0, 0, 0, 0.58);
+  --overlay: rgba(17, 17, 17, 0.58);
 }
 
 * {
@@ -34,7 +36,7 @@ body {
 
 ::selection {
   color: white;
-  background: black;
+  background: var(--ink);
 }
 
 button,
@@ -53,7 +55,7 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 .card-copy:focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -62,6 +64,12 @@ textarea:focus-visible,
   min-height: 100vh;
   margin: 0 auto;
   padding: 0 40px 96px;
+}
+
+.mind-shell.has-empty-state {
+  display: flex;
+  padding-bottom: 30px;
+  flex-direction: column;
 }
 
 .topbar {
@@ -81,7 +89,7 @@ textarea:focus-visible,
 .search-field {
   display: flex;
   grid-column: 1;
-  width: min(100%, 600px);
+  width: min(100%, 360px);
   justify-self: start;
   align-items: center;
   gap: 10px;
@@ -95,7 +103,7 @@ textarea:focus-visible,
 }
 
 .search-field:focus-within {
-  border-color: var(--ink);
+  border-color: var(--accent);
 }
 
 .search-field input {
@@ -115,7 +123,7 @@ textarea:focus-visible,
 .brand {
   display: inline-grid;
   grid-column: 2;
-  width: 120px;
+  width: 64px;
   height: 64px;
   place-items: center;
   color: inherit;
@@ -124,7 +132,7 @@ textarea:focus-visible,
 
 .brand-logo-frame {
   display: grid;
-  width: 120px;
+  width: 64px;
   height: 64px;
   place-items: center;
   overflow: visible;
@@ -132,7 +140,7 @@ textarea:focus-visible,
 
 .brand-logo {
   display: block;
-  width: 120px;
+  width: 54px;
   max-width: none;
   height: auto;
   pointer-events: none;
@@ -169,12 +177,12 @@ kbd {
 
 .primary-button {
   color: white;
-  border: 1px solid black;
-  background: black;
+  border: 1px solid var(--ink);
+  background: var(--ink);
 }
 
 .primary-button:hover:not(:disabled) {
-  color: black;
+  color: var(--ink);
   background: white;
   transform: translateY(-1px);
 }
@@ -192,7 +200,7 @@ kbd {
 
 .secondary-button:hover {
   color: white;
-  background: black;
+  background: var(--ink);
   transform: translateY(-1px);
 }
 
@@ -303,9 +311,12 @@ kbd {
   transition: color 150ms ease;
 }
 
-.filter-chip:hover,
-.filter-chip.active {
+.filter-chip:hover {
   color: var(--ink);
+}
+
+.filter-chip.active {
+  color: var(--accent);
 }
 
 .label-filters {
@@ -348,9 +359,9 @@ kbd {
 }
 
 .label-chip.active {
-  color: white;
-  border-color: var(--ink);
-  background: var(--ink);
+  color: var(--ink);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .loading-state {
@@ -376,6 +387,7 @@ kbd {
 
 .empty-state {
   display: flex;
+  flex: 1;
   min-height: 390px;
   padding: 56px 24px;
   align-items: center;
@@ -395,7 +407,7 @@ kbd {
   place-items: center;
   color: white;
   border-radius: 50%;
-  background: black;
+  background: var(--ink);
   font-size: 26px;
 }
 
@@ -686,7 +698,7 @@ kbd {
   border: 1px solid var(--ink);
   border-radius: 8px;
   background: white;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 28px 80px rgba(17, 17, 17, 0.24);
   animation: modal-in 170ms ease-out;
 }
 
@@ -740,7 +752,7 @@ kbd {
 .capture-tab.active {
   color: var(--ink);
   background: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(17, 17, 17, 0.1);
 }
 
 .capture-form {
@@ -802,8 +814,8 @@ kbd {
 
 .field input:focus,
 .field textarea:focus {
-  border-color: var(--ink);
-  box-shadow: 0 0 0 1px var(--ink);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .field input::placeholder,
@@ -922,7 +934,7 @@ kbd {
   place-items: center;
   color: white;
   border-radius: 50%;
-  background: black;
+  background: var(--ink);
 }
 
 .dropzone.has-preview {
@@ -946,7 +958,7 @@ kbd {
   color: white;
   border: 1px solid white;
   border-radius: 3px;
-  background: black;
+  background: var(--ink);
   font-size: 9px;
   font-weight: 600;
 }
@@ -1018,7 +1030,7 @@ kbd {
 .upload-progress span {
   display: block;
   height: 100%;
-  background: black;
+  background: var(--accent);
   transition: width 120ms ease;
 }
 
@@ -1042,8 +1054,8 @@ kbd {
   color: white;
   border: 1px solid white;
   border-radius: 4px;
-  background: black;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  background: var(--ink);
+  box-shadow: 0 12px 35px rgba(17, 17, 17, 0.2);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -1126,10 +1138,160 @@ kbd {
   font-weight: 600;
 }
 
+.auth-home-link:hover {
+  color: var(--accent);
+}
+
 .auth-message {
   margin: 0;
   color: #384055;
   font-weight: 600;
+}
+
+.auth-intro {
+  margin: -3px 0 4px;
+  color: var(--muted-dark);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.google-sign-in {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.extension-modal .modal-header p {
+  max-width: 410px;
+  margin: 6px 0 0;
+  color: var(--muted-dark);
+  font-size: 12px;
+}
+
+.extension-modal-body {
+  display: grid;
+  gap: 20px;
+  padding: 0 24px 24px;
+}
+
+.create-token-button {
+  justify-self: start;
+}
+
+.new-token-panel {
+  padding: 16px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: var(--soft);
+}
+
+.new-token-panel > strong,
+.token-list-section h3 {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.new-token-panel > p {
+  margin: 3px 0 12px;
+  color: var(--muted-dark);
+  font-size: 11px;
+}
+
+.token-copy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.token-copy-row code {
+  overflow-x: auto;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: white;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.token-copy-row button,
+.token-list button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+}
+
+.token-copy-row button {
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.token-list-section h3 {
+  margin: 0 0 9px;
+}
+
+.token-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.token-list li {
+  display: flex;
+  min-width: 0;
+  padding: 11px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.token-list li > div {
+  display: grid;
+  min-width: 0;
+}
+
+.token-list li strong {
+  font-size: 12px;
+}
+
+.token-list li span,
+.token-loading,
+.token-empty {
+  color: var(--muted-dark);
+  font-size: 10px;
+}
+
+.token-list button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.token-list button:hover {
+  color: #cc3038;
+  border-color: #cc3038;
+}
+
+.token-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.token-empty {
+  margin: 0;
 }
 
 @media (max-width: 900px) {
@@ -1178,18 +1340,22 @@ kbd {
     padding: 0 14px 60px;
   }
 
+  .mind-shell.has-empty-state {
+    padding-bottom: 20px;
+  }
+
   .topbar {
     min-height: 72px;
   }
 
   .brand,
   .brand-logo-frame {
-    width: 104px;
+    width: 54px;
     height: 54px;
   }
 
   .brand-logo {
-    width: 104px;
+    width: 46px;
   }
 
   .primary-button {
@@ -1237,6 +1403,10 @@ kbd {
   }
 
   .capture-form {
+    padding: 0 20px 24px;
+  }
+
+  .extension-modal-body {
     padding: 0 20px 24px;
   }
 

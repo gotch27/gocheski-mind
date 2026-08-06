@@ -19,6 +19,7 @@ export const inspirations = pgTable(
   "inspirations",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: text("owner_id"),
     kind: inspirationKind("kind").notNull(),
     title: varchar("title", { length: 240 }),
     content: text("content"),
@@ -35,10 +36,10 @@ export const inspirations = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
   },
   (table) => [
-    uniqueIndex("inspirations_canonical_url_unique").on(table.canonicalUrl),
-    index("inspirations_created_at_idx").on(table.createdAt),
-    index("inspirations_kind_idx").on(table.kind),
-    index("inspirations_favorite_idx").on(table.favorite)
+    uniqueIndex("inspirations_owner_canonical_url_unique").on(table.ownerId, table.canonicalUrl),
+    index("inspirations_owner_created_at_idx").on(table.ownerId, table.createdAt),
+    index("inspirations_owner_kind_idx").on(table.ownerId, table.kind),
+    index("inspirations_owner_favorite_idx").on(table.ownerId, table.favorite)
   ]
 );
 
@@ -46,11 +47,30 @@ export const tags = pgTable(
   "tags",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: text("owner_id"),
     name: varchar("name", { length: 40 }).notNull(),
     slug: varchar("slug", { length: 50 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
   },
-  (table) => [uniqueIndex("tags_slug_unique").on(table.slug)]
+  (table) => [uniqueIndex("tags_owner_slug_unique").on(table.ownerId, table.slug)]
+);
+
+export const extensionTokens = pgTable(
+  "extension_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: text("owner_id").notNull(),
+    name: varchar("name", { length: 80 }).notNull().default("Chrome extension"),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    tokenPrefix: varchar("token_prefix", { length: 24 }).notNull(),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => [
+    uniqueIndex("extension_tokens_hash_unique").on(table.tokenHash),
+    index("extension_tokens_owner_created_at_idx").on(table.ownerId, table.createdAt)
+  ]
 );
 
 export const inspirationTags = pgTable(

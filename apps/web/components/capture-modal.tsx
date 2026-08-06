@@ -11,6 +11,7 @@ type CaptureTab = "link" | "image" | "note";
 
 type CaptureModalProps = {
   open: boolean;
+  ownerId: string;
   initial: Inspiration | null;
   onClose: () => void;
   onSaved: (inspiration: Inspiration, message: string) => void;
@@ -22,7 +23,7 @@ const TABS: Array<{ value: CaptureTab; label: string }> = [
   { value: "note", label: "Note" }
 ];
 
-export function CaptureModal({ open, initial, onClose, onSaved }: CaptureModalProps) {
+export function CaptureModal({ open, ownerId, initial, onClose, onSaved }: CaptureModalProps) {
   const [tab, setTab] = useState<CaptureTab>("link");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -92,7 +93,7 @@ export function CaptureModal({ open, initial, onClose, onSaved }: CaptureModalPr
       let mimeType: string | undefined;
       if (tab === "image") {
         if (!file) throw new Error("Choose an image to save.");
-        const blob = await upload(`inspirations/${Date.now()}-${safeFilename(file.name)}`, file, {
+        const blob = await upload(`inspirations/${safeOwnerPath(ownerId)}/${Date.now()}-${safeFilename(file.name)}`, file, {
           access: "public",
           handleUploadUrl: withBasePath("/api/blob/upload"),
           multipart: file.size > 5 * 1024 * 1024,
@@ -330,6 +331,10 @@ function parseTags(value: string) {
 
 function safeFilename(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "image";
+}
+
+function safeOwnerPath(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 120);
 }
 
 function toTab(kind: InspirationKind): CaptureTab {

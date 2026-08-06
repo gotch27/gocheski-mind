@@ -1,87 +1,54 @@
 import "server-only";
 
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { requireAuthEnvironment } from "@/nextsignal/config";
+import { createNeonAuth } from "@neondatabase/auth/next/server";
 
-export const sessionCookieName = "goch_admin_session";
-const maxAgeSeconds = 60 * 60 * 24 * 7;
+const missingAuthUrl = "https://configure-neon-auth.invalid";
+const missingCookieSecret = "configure-neon-auth-cookie-secret-before-deploying";
 
-export function createSessionCookie() {
-  const issuedAt = Date.now().toString();
-  const signature = sign(issuedAt);
+export type MindUser = {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
+};
 
-  return [
-    `${sessionCookieName}=${issuedAt}.${signature}`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    secureCookiePart(),
-    `Max-Age=${maxAgeSeconds}`
-  ]
-    .filter(Boolean)
-    .join("; ");
-}
-
-export function clearSessionCookie() {
-  return [
-    `${sessionCookieName}=`,
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    secureCookiePart(),
-    "Max-Age=0"
-  ]
-    .filter(Boolean)
-    .join("; ");
-}
-
-export function isAuthenticatedRequest(request: Request) {
-  return isValidSessionCookie(readSessionCookie(request.headers.get("cookie")));
-}
-
-export function readSessionCookie(cookieHeader: string | null | undefined) {
-  if (!cookieHeader) return undefined;
-
-  for (const part of cookieHeader.split(";")) {
-    const cookie = part.trim();
-    const separator = cookie.indexOf("=");
-    if (separator < 1) continue;
-    if (cookie.slice(0, separator) === sessionCookieName) {
-      return cookie.slice(separator + 1);
-    }
+export const auth = createNeonAuth({
+  baseUrl: process.env.NEON_AUTH_BASE_URL ?? missingAuthUrl,
+  cookies: {
+    secret: process.env.NEON_AUTH_COOKIE_SECRET ?? missingCookieSecret,
+    sameSite: "lax"
   }
+});
 
-  return undefined;
+export function isNeonAuthConfigured() {
+  return Boolean(process.env.NEON_AUTH_BASE_URL && process.env.NEON_AUTH_COOKIE_SECRET);
 }
 
-export function isValidSessionCookie(value: string | undefined) {
-  if (!value) return false;
+export async function getMindUser(): Promise<MindUser | null> {
+  if (!isNeonAuthConfigured()) return null;
 
-  const [issuedAt, signature] = value.split(".");
-  if (!issuedAt || !signature || !safeEqual(signature, sign(issuedAt))) return false;
+  const { data: session } = await auth.getSession();
+  const user = session?.user;
+  if (!user || !isAllowedEmail(user.email)) return null;
 
-  const age = Date.now() - Number(issuedAt);
-  return Number.isFinite(age) && age >= 0 && age <= maxAgeSeconds * 1000;
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    image: user.image
+  };
 }
 
-export function isValidAdminToken(token: unknown) {
-  return typeof token === "string" && safeEqual(token, requireAuthEnvironment("ADMIN_TOKEN"));
+export function isAllowedEmail(email: string) {
+  const allowed = allowedEmails();
+  return allowed.size === 0 || allowed.has(email.trim().toLowerCase());
 }
 
-export function isValidExtensionToken(token: unknown) {
-  return typeof token === "string" && safeEqual(token, requireAuthEnvironment("MIND_EXTENSION_TOKEN"));
-}
-
-function safeEqual(actual: string, expected: string) {
-  const actualBuffer = Buffer.from(actual);
-  const expectedBuffer = Buffer.from(expected);
-  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
-}
-
-function sign(value: string) {
-  return createHmac("sha256", requireAuthEnvironment("SESSION_SECRET")).update(value).digest("hex");
-}
-
-function secureCookiePart() {
-  return process.env.VERCEL ? "Secure" : "";
+function allowedEmails() {
+  return new Set(
+    (process.env.MIND_ALLOWED_EMAILS ?? "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean)
+  );
 }

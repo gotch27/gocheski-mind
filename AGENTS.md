@@ -42,6 +42,6 @@ Gocheski Mind is a private inspiration board and Chrome extension built with Nex
 - Keep the extension free of always-running content scripts. Its scripting permission is limited to injecting a temporary toast after an explicit context-menu capture.
 - Run `npm run check` after TypeScript changes and `npm run build` after larger changes.
 
-The web app uses the same `ADMIN_TOKEN`, `SESSION_SECRET`, and `goch_admin_session` cookie format as `gocheski.com/admin`. The extension uses a separate `MIND_EXTENSION_TOKEN` that only authorizes new captures. Keep those trust boundaries intact.
+The web app uses Neon Auth with Google OAuth. Every inspiration and label must be scoped by the authenticated Neon user ID. The extension uses a separate, hashed, revocable token per user that only authorizes new captures. Keep those trust boundaries intact.
 
 The app intentionally has no background worker, queue, or scheduler. Add those only when the product requires them.

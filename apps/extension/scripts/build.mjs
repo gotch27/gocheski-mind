@@ -37,11 +37,11 @@ await Promise.all([
 const favicon = await readFile(webFavicon);
 for (const size of [16, 32, 48, 128]) {
   const logo = await sharp(favicon)
-    .resize(Math.max(12, Math.round(size * 0.78)), Math.max(12, Math.round(size * 0.78)), { fit: "contain" })
+    .resize(Math.max(12, Math.round(size * 0.88)), Math.max(12, Math.round(size * 0.88)), { fit: "contain" })
     .png()
     .toBuffer();
   await sharp({
-    create: { width: size, height: size, channels: 4, background: "#050505" }
+    create: { width: size, height: size, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
   })
     .composite([{ input: logo, gravity: "center" }])
     .png()

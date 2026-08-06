@@ -1,5 +1,5 @@
 :root {
-  color: #050505;
+  color: #111111;
   background: #f7f7f4;
   font-family: Arial, Helvetica, sans-serif;
   font-synthesis: none;
@@ -26,7 +26,7 @@ a {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid #050505;
+  outline: 2px solid #ff6b00;
   outline-offset: 2px;
 }
 
@@ -91,7 +91,7 @@ input:focus-visible {
 button {
   min-height: 42px;
   padding: 0 14px;
-  color: #050505;
+  color: #111111;
   border: 1px solid #c9c9c9;
   border-radius: 5px;
   background: white;
@@ -100,13 +100,13 @@ button {
 }
 
 button:hover {
-  border-color: #050505;
+  border-color: #ff6b00;
 }
 
 button.primary {
   color: white;
-  border-color: #050505;
-  background: #050505;
+  border-color: #111111;
+  background: #111111;
 }
 
 .options-page {
@@ -175,7 +175,7 @@ label small {
 input {
   min-height: 46px;
   padding: 0 12px;
-  color: #050505;
+  color: #111111;
   border: 1px solid #bfc3cf;
   border-radius: 5px;
   background: white;

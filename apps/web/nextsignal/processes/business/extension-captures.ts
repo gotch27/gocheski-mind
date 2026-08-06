@@ -1,12 +1,17 @@
-import { businessProcess, forwardFault, ok, systemFail, validateWith, value } from "@gotch/nextsignal";
+import { businessProcess, forwardFault, ok, systemFail, value } from "@gotch/nextsignal";
 import type { ExtensionCaptureInput } from "@gocheski-mind/contracts";
 import { normalizeInspirationTitle, type CreateInspirationInput } from "@/lib/inspirations";
-import { extensionCaptureSchema } from "@/nextsignal/schemas";
 import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
+import { createInspirationForOwner } from "@/nextsignal/processes/business/inspirations";
+
+export type OwnedExtensionCaptureInput = {
+  ownerId: string;
+  capture: ExtensionCaptureInput;
+};
 
 export const captureFromExtensionBusiness = businessProcess<
-  ExtensionCaptureInput,
+  OwnedExtensionCaptureInput,
   CreateInspirationRecordResult,
   AppServices
 >({
@@ -18,20 +23,21 @@ export const captureFromExtensionBusiness = businessProcess<
     version: "0.1.0"
   },
   auth: () => ok(),
-  validate: validateWith(extensionCaptureSchema),
+  validate: () => ok(),
   async handle(ctx, input) {
-    const createInput = await toCreateInput(ctx.services, input);
-    const result = await ctx.mediator.dispatch<CreateInspirationInput, CreateInspirationRecordResult>(
-      "inspirations.createBusiness",
-      createInput
-    );
+    const createInput = await toCreateInput(ctx.services, input.ownerId, input.capture);
+    const result = await createInspirationForOwner(ctx, input.ownerId, createInput);
     if (!result.ok) return forwardFault(result);
     if (!result.data) return systemFail(new Error("Create process returned no extension inspiration."));
     return value(result.data);
   }
 });
 
-async function toCreateInput(services: AppServices, input: ExtensionCaptureInput): Promise<CreateInspirationInput> {
+async function toCreateInput(
+  services: AppServices,
+  ownerId: string,
+  input: ExtensionCaptureInput
+): Promise<CreateInspirationInput> {
   const title = normalizeInspirationTitle(input.pageTitle);
   const tags = input.tags ?? [];
 
@@ -43,7 +49,7 @@ async function toCreateInput(services: AppServices, input: ExtensionCaptureInput
     case "selection":
       return { kind: "quote", sourceUrl: input.pageUrl, title, content: input.text!, tags };
     case "image": {
-      const image = await services.blob.copyRemoteImage(input.targetUrl!);
+      const image = await services.blob.copyRemoteImage(ownerId, input.targetUrl!);
       return {
         kind: "image",
         sourceUrl: input.pageUrl,

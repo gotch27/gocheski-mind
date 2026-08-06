@@ -14,7 +14,7 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 };
 
 export const blobService = {
-  async copyRemoteImage(value: string) {
+  async copyRemoteImage(ownerId: string, value: string) {
     await config.load();
     const token = config.require<string>("blob.token");
     const response = await fetchRemoteImage(value);
@@ -31,7 +31,7 @@ export const blobService = {
 
     const bytes = await readLimitedBytes(response, MAXIMUM_IMAGE_SIZE);
     const extension = IMAGE_EXTENSIONS[contentType] ?? "img";
-    return put(`inspirations/browser-capture.${extension}`, bytes, {
+    return put(`inspirations/${safeOwnerPath(ownerId)}/browser-capture.${extension}`, bytes, {
       access: "public",
       addRandomSuffix: true,
       cacheControlMaxAge: 31_536_000,
@@ -40,7 +40,7 @@ export const blobService = {
     });
   },
 
-  async handleImageUpload(request: Request, body: HandleUploadBody) {
+  async handleImageUpload(ownerId: string, request: Request, body: HandleUploadBody) {
     await config.load();
     const token = config.get<string>("blob.token");
 
@@ -49,7 +49,8 @@ export const blobService = {
       body,
       token,
       async onBeforeGenerateToken(pathname) {
-        if (!pathname.startsWith("inspirations/") || pathname.includes("..")) {
+        const ownerPrefix = `inspirations/${safeOwnerPath(ownerId)}/`;
+        if (!pathname.startsWith(ownerPrefix) || pathname.includes("..")) {
           throw new Error("Invalid inspiration image path.");
         }
 
@@ -70,6 +71,10 @@ export const blobService = {
     await del(url, { token });
   }
 };
+
+export function safeOwnerPath(ownerId: string) {
+  return ownerId.replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 120);
+}
 
 async function fetchRemoteImage(value: string) {
   let currentUrl = normalizeRemoteUrl(value);

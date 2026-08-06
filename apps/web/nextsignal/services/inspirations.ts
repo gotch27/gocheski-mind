@@ -15,9 +15,9 @@ export type CreateInspirationRecordResult = {
 };
 
 export const inspirationService = {
-  async list(input: InspirationListInput): Promise<Inspiration[]> {
+  async list(ownerId: string, input: InspirationListInput): Promise<Inspiration[]> {
     const db = await getDatabase();
-    const conditions: SQL[] = [];
+    const conditions: SQL[] = [eq(inspirations.ownerId, ownerId)];
 
     if (input.kind) conditions.push(eq(inspirations.kind, input.kind));
     if (input.favorite !== undefined) conditions.push(eq(inspirations.favorite, input.favorite));
@@ -27,7 +27,7 @@ export const inspirationService = {
         .select({ id: inspirationTags.inspirationId })
         .from(inspirationTags)
         .innerJoin(tagsTable, eq(tagsTable.id, inspirationTags.tagId))
-        .where(eq(tagsTable.name, input.tag));
+        .where(and(eq(tagsTable.ownerId, ownerId), eq(tagsTable.name, input.tag)));
       if (matchingTags.length === 0) return [];
       conditions.push(inArray(inspirations.id, matchingTags.map((row) => row.id)));
     }
@@ -38,7 +38,7 @@ export const inspirationService = {
         .selectDistinct({ id: inspirationTags.inspirationId })
         .from(inspirationTags)
         .innerJoin(tagsTable, eq(tagsTable.id, inspirationTags.tagId))
-        .where(ilike(tagsTable.name, pattern));
+        .where(and(eq(tagsTable.ownerId, ownerId), ilike(tagsTable.name, pattern)));
       const matchingTagIds = matchingTags.map((row) => row.id);
 
       conditions.push(
@@ -59,21 +59,22 @@ export const inspirationService = {
       .orderBy(desc(inspirations.createdAt))
       .limit(input.limit ?? 80);
 
-    const tagMap = await readTagMap(rows.map((row) => row.id));
+    const tagMap = await readTagMap(ownerId, rows.map((row) => row.id));
     return rows.map((row) => toInspiration(row, tagMap.get(row.id) ?? []));
   },
 
-  async listLabels(): Promise<string[]> {
+  async listLabels(ownerId: string): Promise<string[]> {
     const db = await getDatabase();
     const rows = await db
       .selectDistinct({ name: tagsTable.name })
       .from(tagsTable)
       .innerJoin(inspirationTags, eq(inspirationTags.tagId, tagsTable.id))
+      .where(eq(tagsTable.ownerId, ownerId))
       .orderBy(asc(tagsTable.name));
     return rows.map((row) => row.name);
   },
 
-  async create(input: CreateInspirationInput): Promise<CreateInspirationRecordResult> {
+  async create(ownerId: string, input: CreateInspirationInput): Promise<CreateInspirationRecordResult> {
     const db = await getDatabase();
     const sourceUrl = input.sourceUrl ? normalizeUrl(input.sourceUrl) : undefined;
     const canonicalUrl = input.kind === "link" && sourceUrl ? normalizeUrl(sourceUrl) : undefined;
@@ -82,14 +83,14 @@ export const inspirationService = {
       const [existing] = await db
         .select({ id: inspirations.id })
         .from(inspirations)
-        .where(eq(inspirations.canonicalUrl, canonicalUrl))
+        .where(and(eq(inspirations.ownerId, ownerId), eq(inspirations.canonicalUrl, canonicalUrl)))
         .limit(1);
 
       if (existing) {
-        const current = await readById(existing.id);
+        const current = await readById(ownerId, existing.id);
         if (!current) throw new Error("The duplicate inspiration could not be loaded.");
-        if (input.tags?.length) await syncTags(existing.id, [...current.tags, ...input.tags]);
-        const inspiration = input.tags?.length ? await readById(existing.id) : current;
+        if (input.tags?.length) await syncTags(ownerId, existing.id, [...current.tags, ...input.tags]);
+        const inspiration = input.tags?.length ? await readById(ownerId, existing.id) : current;
         if (!inspiration) throw new Error("The duplicate inspiration could not be loaded.");
         return { inspiration, duplicate: true };
       }
@@ -98,6 +99,7 @@ export const inspirationService = {
     const [created] = await db
       .insert(inspirations)
       .values({
+        ownerId,
         kind: input.kind,
         title: cleanOptional(input.title),
         content: cleanOptional(input.content),
@@ -112,15 +114,19 @@ export const inspirationService = {
       })
       .returning({ id: inspirations.id });
 
-    await syncTags(created.id, input.tags ?? []);
-    const inspiration = await readById(created.id);
+    await syncTags(ownerId, created.id, input.tags ?? []);
+    const inspiration = await readById(ownerId, created.id);
     if (!inspiration) throw new Error("The new inspiration could not be loaded.");
     return { inspiration, duplicate: false };
   },
 
-  async update(input: UpdateInspirationInput): Promise<Inspiration | null> {
+  async update(ownerId: string, input: UpdateInspirationInput): Promise<Inspiration | null> {
     const db = await getDatabase();
-    const [existing] = await db.select().from(inspirations).where(eq(inspirations.id, input.id)).limit(1);
+    const [existing] = await db
+      .select()
+      .from(inspirations)
+      .where(and(eq(inspirations.id, input.id), eq(inspirations.ownerId, ownerId)))
+      .limit(1);
     if (!existing) return null;
 
     const values: Partial<typeof inspirations.$inferInsert> = { updatedAt: new Date() };
@@ -135,34 +141,41 @@ export const inspirationService = {
       values.canonicalUrl = existing.kind === "link" && sourceUrl ? sourceUrl : null;
     }
 
-    await db.update(inspirations).set(values).where(eq(inspirations.id, input.id));
-    if (input.tags !== undefined) await syncTags(input.id, input.tags);
-    return readById(input.id);
+    await db
+      .update(inspirations)
+      .set(values)
+      .where(and(eq(inspirations.id, input.id), eq(inspirations.ownerId, ownerId)));
+    if (input.tags !== undefined) await syncTags(ownerId, input.id, input.tags);
+    return readById(ownerId, input.id);
   },
 
-  async delete(id: string) {
+  async delete(ownerId: string, id: string) {
     const db = await getDatabase();
     const [existing] = await db
       .select({ id: inspirations.id, imageUrl: inspirations.imageUrl, blobPathname: inspirations.blobPathname })
       .from(inspirations)
-      .where(eq(inspirations.id, id))
+      .where(and(eq(inspirations.id, id), eq(inspirations.ownerId, ownerId)))
       .limit(1);
     if (!existing) return null;
 
-    await db.delete(inspirations).where(eq(inspirations.id, id));
+    await db.delete(inspirations).where(and(eq(inspirations.id, id), eq(inspirations.ownerId, ownerId)));
     return existing;
   }
 };
 
-async function readById(id: string) {
+async function readById(ownerId: string, id: string) {
   const db = await getDatabase();
-  const [row] = await db.select().from(inspirations).where(eq(inspirations.id, id)).limit(1);
+  const [row] = await db
+    .select()
+    .from(inspirations)
+    .where(and(eq(inspirations.id, id), eq(inspirations.ownerId, ownerId)))
+    .limit(1);
   if (!row) return null;
-  const tagMap = await readTagMap([id]);
+  const tagMap = await readTagMap(ownerId, [id]);
   return toInspiration(row, tagMap.get(id) ?? []);
 }
 
-async function readTagMap(ids: string[]) {
+async function readTagMap(ownerId: string, ids: string[]) {
   const map = new Map<string, string[]>();
   if (ids.length === 0) return map;
 
@@ -171,7 +184,7 @@ async function readTagMap(ids: string[]) {
     .select({ inspirationId: inspirationTags.inspirationId, name: tagsTable.name })
     .from(inspirationTags)
     .innerJoin(tagsTable, eq(tagsTable.id, inspirationTags.tagId))
-    .where(inArray(inspirationTags.inspirationId, ids));
+    .where(and(eq(tagsTable.ownerId, ownerId), inArray(inspirationTags.inspirationId, ids)));
 
   for (const row of rows) {
     const names = map.get(row.inspirationId) ?? [];
@@ -181,7 +194,7 @@ async function readTagMap(ids: string[]) {
   return map;
 }
 
-async function syncTags(inspirationId: string, names: string[]) {
+async function syncTags(ownerId: string, inspirationId: string, names: string[]) {
   const db = await getDatabase();
   const normalized = [...new Set(names.map((name) => name.trim()).filter(Boolean))].slice(0, 12);
   await db.delete(inspirationTags).where(eq(inspirationTags.inspirationId, inspirationId));
@@ -190,8 +203,8 @@ async function syncTags(inspirationId: string, names: string[]) {
     const slug = slugify(name);
     const [tag] = await db
       .insert(tagsTable)
-      .values({ name, slug })
-      .onConflictDoUpdate({ target: tagsTable.slug, set: { name } })
+      .values({ ownerId, name, slug })
+      .onConflictDoUpdate({ target: [tagsTable.ownerId, tagsTable.slug], set: { name } })
       .returning({ id: tagsTable.id });
     await db.insert(inspirationTags).values({ inspirationId, tagId: tag.id }).onConflictDoNothing();
   }

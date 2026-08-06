@@ -167,8 +167,8 @@ function renderMindToast(tone: ToastTone, title: string, message: string) {
 
   const shadow = host.shadowRoot ?? host.attachShadow({ mode: "open" });
   const palette = {
-    loading: { surface: "#101010", accent: "#ffffff", icon: "…" },
-    success: { surface: "#101010", accent: "#58b368", icon: "✓" },
+    loading: { surface: "#111111", accent: "#ff6b00", icon: "…" },
+    success: { surface: "#111111", accent: "#58b368", icon: "✓" },
     neutral: { surface: "#4f535b", accent: "#ffffff", icon: "✓" },
     error: { surface: "#b42318", accent: "#ffffff", icon: "!" }
   }[tone];
@@ -193,7 +193,7 @@ function renderMindToast(tone: ToastTone, title: string, message: string) {
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 9px;
       background: ${palette.surface};
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 12px 40px rgba(17, 17, 17, 0.28);
       font-family: Arial, Helvetica, sans-serif;
       -webkit-font-smoothing: antialiased;
       animation: mind-toast-in 180ms ease-out;

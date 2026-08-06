@@ -1,4 +1,5 @@
-import { businessProcess, notFound, ok, validateWith, value, type ProcessContext } from "@gotch/nextsignal";
+import { businessProcess, notFound, ok, requireUser, validateWith, value, type ProcessContext } from "@gotch/nextsignal";
+import type { MindUser } from "@/app/lib/mind-auth";
 import type {
   CreateInspirationInput,
   Inspiration,
@@ -23,10 +24,10 @@ export const listInspirationsBusiness = businessProcess<InspirationListInput, In
     owner: "mind",
     version: "0.1.0"
   },
-  auth: () => ok(),
+  auth: requireUser(),
   validate: validateWith(listInspirationsSchema),
   async handle(ctx, input) {
-    return value(await ctx.services.inspirations.list(input));
+    return value(await ctx.services.inspirations.list(await currentOwnerId(ctx), input));
   }
 });
 
@@ -38,10 +39,10 @@ export const listInspirationLabelsBusiness = businessProcess<Record<string, neve
     owner: "mind",
     version: "0.1.0"
   },
-  auth: () => ok(),
+  auth: requireUser(),
   validate: () => ok(),
   async handle(ctx) {
-    return value(await ctx.services.inspirations.listLabels());
+    return value(await ctx.services.inspirations.listLabels(await currentOwnerId(ctx)));
   }
 });
 
@@ -57,13 +58,21 @@ export const createInspirationBusiness = businessProcess<
     owner: "mind",
     version: "0.1.0"
   },
-  auth: () => ok(),
+  auth: requireUser(),
   validate: validateWith(createInspirationSchema),
   handle: createInspirationHandle
 });
 
 async function createInspirationHandle(
   ctx: ProcessContext<AppServices>,
+  input: CreateInspirationInput
+) {
+  return createInspirationForOwner(ctx, await currentOwnerId(ctx), input);
+}
+
+export async function createInspirationForOwner(
+  ctx: ProcessContext<AppServices>,
+  ownerId: string,
   input: CreateInspirationInput
 ) {
   let enriched = input;
@@ -88,7 +97,7 @@ async function createInspirationHandle(
     }
   }
 
-  return value(await ctx.services.inspirations.create(enriched));
+  return value(await ctx.services.inspirations.create(ownerId, enriched));
 }
 
 export const updateInspirationBusiness = businessProcess<UpdateInspirationInput, Inspiration, AppServices>({
@@ -99,10 +108,10 @@ export const updateInspirationBusiness = businessProcess<UpdateInspirationInput,
     owner: "mind",
     version: "0.1.0"
   },
-  auth: () => ok(),
+  auth: requireUser(),
   validate: validateWith(updateInspirationSchema),
   async handle(ctx, input) {
-    const updated = await ctx.services.inspirations.update(input);
+    const updated = await ctx.services.inspirations.update(await currentOwnerId(ctx), input);
     return updated ? value(updated) : notFound("Inspiration not found.");
   }
 });
@@ -115,10 +124,10 @@ export const deleteInspirationBusiness = businessProcess<InspirationIdInput, { i
     owner: "mind",
     version: "0.1.0"
   },
-  auth: () => ok(),
+  auth: requireUser(),
   validate: validateWith(inspirationIdSchema),
   async handle(ctx, input) {
-    const deleted = await ctx.services.inspirations.delete(input.id);
+    const deleted = await ctx.services.inspirations.delete(await currentOwnerId(ctx), input.id);
     if (!deleted) return notFound("Inspiration not found.");
 
     if (deleted.blobPathname && deleted.imageUrl) {
@@ -137,3 +146,9 @@ export const deleteInspirationBusiness = businessProcess<InspirationIdInput, { i
     return value({ id: input.id });
   }
 });
+
+async function currentOwnerId(ctx: ProcessContext<AppServices>) {
+  const user = await ctx.auth.currentUser?.(ctx) as MindUser | null | undefined;
+  if (!user) throw new Error("Authenticated user was unavailable.");
+  return user.id;
+}

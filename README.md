@@ -1,6 +1,6 @@
 # Gocheski Mind
 
-A private inspiration board and companion Chrome extension for saving pages, links, selected text, and images.
+A multi-user inspiration board and companion Chrome extension for saving pages, links, selected text, and images.
 
 ## Repository
 
@@ -22,13 +22,13 @@ The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Verce
    npm install
    ```
 
-2. Copy `apps/web/.env.example` to `apps/web/.env.local` and configure:
+2. Copy the single environment template, `apps/web/.env.example`, to `apps/web/.env.local` and configure:
 
    - `DATABASE_URL` — Neon connection string.
    - `BLOB_READ_WRITE_TOKEN` — token for a public Vercel Blob store.
-   - `ADMIN_TOKEN` — password for the Mind login screen.
-   - `SESSION_SECRET` — secret used to sign the login cookie.
-   - `MIND_EXTENSION_TOKEN` — separate secret accepted only by the extension capture endpoint.
+   - `NEON_AUTH_BASE_URL` — Auth URL shown after enabling Neon Auth.
+   - `NEON_AUTH_COOKIE_SECRET` — random secret of at least 32 characters used for cached session cookies.
+   - `MIND_ALLOWED_EMAILS` — comma-separated Google addresses allowed into the app; leave empty for open registration.
 
 3. Apply the committed database migration and start the app:
 
@@ -50,14 +50,9 @@ Then:
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Choose **Load unpacked** and select `apps/extension/dist`.
-4. Open the extension's **Settings** page and paste the same value used for `MIND_EXTENSION_TOKEN`.
-5. Optionally add comma-separated default tags.
-
-On macOS, this copies the local token without printing it to the terminal:
-
-```bash
-rg '^MIND_EXTENSION_TOKEN=' apps/web/.env.local | cut -d= -f2- | pbcopy
-```
+4. Sign into Mind, choose **Extension**, and generate a personal extension key.
+5. Open the extension's **Settings** page and paste that key.
+6. Optionally add comma-separated default tags.
 
 Right-click a page, link, text selection, or image and choose **Save to Mind**. A temporary toast on the current page reports saving, success, duplicate, or error status. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
 
@@ -69,9 +64,35 @@ Production builds use `/mind` as the default Next.js base path. The main `goches
 
 Run `npm run db:migrate` against the production Neon database before using a migration that changes the schema.
 
-## Capture security
+## Authentication and capture security
 
-The board uses the shared `ADMIN_TOKEN` login and signed `goch_admin_session` cookie. The Chrome extension does not receive that cookie or admin token. It uses `MIND_EXTENSION_TOKEN`, which is accepted only by `POST /api/extension/captures`.
+The board uses Neon Auth with Google OAuth. Every inspiration, label, duplicate check, upload, edit, and delete is scoped to the authenticated Neon user ID.
+
+After the original owner signs in once, transfer pre-authentication records from the Neon SQL Editor. First find the user ID:
+
+```sql
+SELECT id, email
+FROM neon_auth.user
+WHERE lower(email) = lower('you@example.com');
+```
+
+Then replace `YOUR_NEON_AUTH_USER_ID` below with that result and run the transfer in one transaction:
+
+```sql
+BEGIN;
+
+UPDATE inspirations
+SET owner_id = 'YOUR_NEON_AUTH_USER_ID'
+WHERE owner_id IS NULL;
+
+UPDATE tags
+SET owner_id = 'YOUR_NEON_AUTH_USER_ID'
+WHERE owner_id IS NULL;
+
+COMMIT;
+```
+
+The Chrome extension does not receive the Google session. Each user generates a random, revocable capture key from the web app. Only its SHA-256 hash is stored in Postgres, and the key is accepted only by `POST /api/extension/captures`.
 
 Remote image capture accepts public HTTP(S) JPEG, PNG, WebP, GIF, or AVIF files up to 25 MB. Private network addresses and unsafe redirects are rejected.
 

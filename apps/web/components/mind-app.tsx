@@ -3,6 +3,7 @@
 import {
   LoaderCircle,
   LogOut,
+  Plug,
   Plus,
   Search,
   Sparkles,
@@ -14,6 +15,7 @@ import { readApiError } from "@/lib/api";
 import { withBasePath } from "@/lib/base-path";
 import { CaptureModal } from "@/components/capture-modal";
 import { InspirationCard } from "@/components/inspiration-card";
+import { ExtensionAccessModal } from "@/components/extension-access-modal";
 
 type Filter = "all" | InspirationKind | "favorite";
 
@@ -26,7 +28,34 @@ const FILTERS: Array<{ value: Filter; label: string }> = [
   { value: "favorite", label: "Favorites" }
 ];
 
-export function MindApp() {
+const EMPTY_FILTER_COPY: Record<Exclude<Filter, "all">, { title: string; description: string }> = {
+  link: {
+    title: "No links here yet",
+    description: "Save a page you want to find again."
+  },
+  image: {
+    title: "No images here yet",
+    description: "Add the first visual that belongs in this space."
+  },
+  note: {
+    title: "No notes here yet",
+    description: "Write down a thought you want to keep."
+  },
+  quote: {
+    title: "No quotes here yet",
+    description: "Save the first line worth remembering."
+  },
+  favorite: {
+    title: "No favorites yet",
+    description: "Use the heart on an inspiration to keep it close."
+  }
+};
+
+type MindAppProps = {
+  user: { id: string; name: string; email: string };
+};
+
+export function MindApp({ user }: MindAppProps) {
   const [items, setItems] = useState<Inspiration[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
@@ -37,6 +66,7 @@ export function MindApp() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Inspiration | null>(null);
+  const [extensionModalOpen, setExtensionModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -147,14 +177,29 @@ export function MindApp() {
   async function logout() {
     setLoggingOut(true);
     try {
-      await fetch(withBasePath("/api/auth/login"), { method: "DELETE" });
+      const { getAuthClient } = await import("@/app/lib/auth-client");
+      await getAuthClient().signOut();
     } finally {
       window.location.replace(withBasePath("/"));
     }
   }
 
+  const isEmpty = !loading && !error && items.length === 0;
+  const hasSearchOrLabel = Boolean(query.trim() || selectedLabel);
+  const emptyCopy = hasSearchOrLabel
+    ? {
+        title: "Nothing matches that thought",
+        description: "Try another word or clear the active label."
+      }
+    : filter === "all"
+      ? {
+          title: "Your mind has room",
+          description: "Start with a link, an image, or a note you want to meet again."
+        }
+      : EMPTY_FILTER_COPY[filter];
+
   return (
-    <main className="mind-shell" id="top">
+    <main className={isEmpty ? "mind-shell has-empty-state" : "mind-shell"} id="top">
       <header className="topbar">
         <label className="search-field">
           <Search size={18} aria-hidden="true" />
@@ -176,11 +221,15 @@ export function MindApp() {
 
         <a className="brand" href="#top" aria-label="Gocheski Mind home">
           <span className="brand-logo-frame" aria-hidden="true">
-            <img className="brand-logo" src={withBasePath("/goch-logo.svg")} alt="" draggable="false" />
+            <img className="brand-logo" src={withBasePath("/gajret-logo.svg")} alt="" draggable="false" />
           </span>
         </a>
 
         <div className="topbar-actions">
+          <button className="logout-button" type="button" onClick={() => setExtensionModalOpen(true)}>
+            <Plug size={17} />
+            <span>Extension</span>
+          </button>
           <button
             className="primary-button"
             type="button"
@@ -256,13 +305,9 @@ export function MindApp() {
       ) : items.length === 0 ? (
         <section className="empty-state">
           <span className="empty-symbol"><Sparkles size={28} /></span>
-          <h2>{query || filter !== "all" || selectedLabel ? "Nothing matches that thought" : "Your mind has room"}</h2>
-          <p>
-            {query || filter !== "all" || selectedLabel
-              ? "Try another word or return to everything."
-              : "Start with a link, an image, or a note you want to meet again."}
-          </p>
-          {query || filter !== "all" || selectedLabel ? (
+          <h2>{emptyCopy.title}</h2>
+          <p>{emptyCopy.description}</p>
+          {hasSearchOrLabel || filter === "favorite" ? (
             <button
               className="secondary-button"
               type="button"
@@ -299,6 +344,7 @@ export function MindApp() {
 
       <CaptureModal
         open={modalOpen}
+        ownerId={user.id}
         initial={editing}
         onClose={() => {
           setModalOpen(false);
@@ -306,6 +352,8 @@ export function MindApp() {
         }}
         onSaved={handleSaved}
       />
+
+      <ExtensionAccessModal open={extensionModalOpen} onClose={() => setExtensionModalOpen(false)} />
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>

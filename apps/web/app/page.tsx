@@ -1,13 +1,17 @@
-import { cookies } from "next/headers";
-import { isValidSessionCookie, sessionCookieName } from "@/app/lib/mind-auth";
+import { auth, isAllowedEmail, isNeonAuthConfigured } from "@/app/lib/mind-auth";
 import { MindApp } from "@/components/mind-app";
+import { AuthUnavailable, MindAccessDenied } from "@/components/mind-login";
 import { MindLogin } from "@/components/mind-login";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get(sessionCookieName)?.value;
+  if (!isNeonAuthConfigured()) return <AuthUnavailable />;
 
-  return isValidSessionCookie(session) ? <MindApp /> : <MindLogin />;
+  const { data: session } = await auth.getSession();
+  const user = session?.user;
+  if (!user) return <MindLogin />;
+  if (!isAllowedEmail(user.email)) return <MindAccessDenied email={user.email} />;
+
+  return <MindApp user={{ id: user.id, name: user.name, email: user.email }} />;
 }

@@ -86,4 +86,12 @@ export const updateInspirationSchema = z
 
 export const inspirationIdSchema = z.object({ id: z.uuid() });
 
+export const createExtensionTokenSchema = z.object({
+  name: z.string().trim().min(1).max(80).default("Chrome extension")
+});
+
+export const extensionTokenIdSchema = z.object({ id: z.uuid() });
+
 export type InspirationIdInput = z.infer<typeof inspirationIdSchema>;
+export type CreateExtensionTokenInput = z.infer<typeof createExtensionTokenSchema>;
+export type ExtensionTokenIdInput = z.infer<typeof extensionTokenIdSchema>;

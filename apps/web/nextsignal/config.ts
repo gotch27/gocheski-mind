@@ -23,9 +23,3 @@ const platformEnvProvider: ConfigProvider = {
 export const config = createConfig({
   providers: [platformEnvProvider]
 });
-
-export function requireAuthEnvironment(name: "ADMIN_TOKEN" | "SESSION_SECRET" | "MIND_EXTENSION_TOKEN") {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing required environment variable: ${name}`);
-  return value;
-}
