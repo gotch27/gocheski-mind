@@ -1,5 +1,6 @@
 export const API_BASE_URL = "https://www.gocheski.com/mind";
 export const BOARD_URL = "https://www.gocheski.com/mind";
+export const CONNECT_URL = "https://www.gocheski.com/mind/extension/connect";
 
 export type ExtensionSettings = {
   token: string;

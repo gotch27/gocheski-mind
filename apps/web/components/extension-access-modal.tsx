@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, LoaderCircle, Plus, Trash2, X } from "lucide-react";
+import { Check, Copy, ExternalLink, LoaderCircle, Plus, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import type { CreatedExtensionToken, ExtensionToken } from "@/lib/extension-tokens";
 import type { ApiResult } from "@/lib/inspirations";
@@ -92,7 +92,7 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
         <header className="modal-header">
           <div>
             <h2 id="extension-title">Connect the extension</h2>
-            <p>Generate a personal key, then paste it into the Chrome extension settings.</p>
+            <p>Connect this browser automatically or manage its revocable access keys.</p>
           </div>
           <button className="icon-button" type="button" onClick={onClose} aria-label="Close">
             <X size={20} />
@@ -100,6 +100,18 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
         </header>
 
         <div className="extension-modal-body">
+          <section className="automatic-connect-panel">
+            <div>
+              <strong>Recommended</strong>
+              <p>Connect the Chrome Web Store extension without copying a key.</p>
+            </div>
+            <a className="primary-button" href={withBasePath("/extension/connect")}>
+              Connect this browser <ExternalLink size={15} />
+            </a>
+          </section>
+
+          <p className="manual-token-heading">Manual keys</p>
+
           {created ? (
             <section className="new-token-panel">
               <strong>Copy this key now</strong>

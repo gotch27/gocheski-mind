@@ -54,6 +54,8 @@ Then:
 5. Open the extension's **Settings** page and paste that key.
 6. Optionally add comma-separated default tags.
 
+The published Chrome Web Store extension (`ecnghadaoncoimohifncimlgpacnicom`) supports automatic setup: click **Connect to Mind** in its popup, sign in on the website, review the capture disclosure, and approve the connection. Unpacked builds have a different extension ID, so manual key entry remains available for local development.
+
 Right-click a page, link, text selection, or image and choose **Save to Mind**. A temporary toast on the current page reports saving, success, duplicate, or error status. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
 
 ## Vercel
@@ -92,7 +94,7 @@ WHERE owner_id IS NULL;
 COMMIT;
 ```
 
-The Chrome extension does not receive the Google session. Each user generates a random, revocable capture key from the web app. Only its SHA-256 hash is stored in Postgres, and the key is accepted only by `POST /api/extension/captures`.
+The Chrome extension does not receive the Google session. Each browser receives a random, revocable capture key from the web app, either through the Web Store connection page or through manual setup. Only its SHA-256 hash is stored in Postgres, and the key is accepted only by `POST /api/extension/captures`. The production connection page can message only the published Web Store extension, and the extension accepts setup messages only from the exact `https://www.gocheski.com/mind/extension/connect` page.
 
 Remote image capture accepts public HTTP(S) JPEG, PNG, WebP, GIF, or AVIF files up to 25 MB. Private network addresses and unsafe redirects are rejected.
 

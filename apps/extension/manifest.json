@@ -2,10 +2,13 @@
   "manifest_version": 3,
   "name": "Gocheski Mind",
   "description": "Save pages, links, selected text, and images to your private inspiration board.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "minimum_chrome_version": "102",
   "permissions": ["activeTab", "contextMenus", "scripting", "storage"],
   "host_permissions": ["https://www.gocheski.com/*"],
+  "externally_connectable": {
+    "matches": ["https://www.gocheski.com/*"]
+  },
   "background": {
     "service_worker": "background.js",
     "type": "module"

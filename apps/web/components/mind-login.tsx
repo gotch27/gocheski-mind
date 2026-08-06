@@ -5,7 +5,7 @@ import { useState } from "react";
 import { getAuthClient } from "@/app/lib/auth-client";
 import { withBasePath } from "@/lib/base-path";
 
-export function MindLogin() {
+export function MindLogin({ callbackPath = "/" }: { callbackPath?: string }) {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -14,7 +14,7 @@ export function MindLogin() {
     setMessage("");
 
     try {
-      const callbackURL = `${window.location.origin}${withBasePath("/")}`;
+      const callbackURL = `${window.location.origin}${withBasePath(callbackPath)}`;
       const result = await getAuthClient().signIn.social({
         provider: "google",
         callbackURL,

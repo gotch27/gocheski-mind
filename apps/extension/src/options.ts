@@ -1,11 +1,16 @@
-import { parseTags, readSettings, saveSettings } from "./settings";
+import { CONNECT_URL, parseTags, readSettings, saveSettings } from "./settings";
 
 const form = document.querySelector<HTMLFormElement>("[data-settings-form]");
 const tokenInput = document.querySelector<HTMLInputElement>("[data-token]");
 const tagsInput = document.querySelector<HTMLInputElement>("[data-tags]");
 const message = document.querySelector<HTMLElement>("[data-message]");
+const connectMind = document.querySelector<HTMLButtonElement>("[data-connect-mind]");
 
 void hydrate();
+
+connectMind?.addEventListener("click", () => {
+  void chrome.tabs.create({ url: CONNECT_URL });
+});
 
 form?.addEventListener("submit", (event) => {
   event.preventDefault();

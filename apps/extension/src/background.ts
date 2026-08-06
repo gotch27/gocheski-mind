@@ -1,5 +1,5 @@
 import type { ExtensionCaptureInput, ExtensionCaptureResponse } from "@gocheski-mind/contracts";
-import { API_BASE_URL, readSettings } from "./settings";
+import { API_BASE_URL, readSettings, saveSettings } from "./settings";
 
 const MENU_ID = "save-to-gocheski-mind";
 
@@ -20,6 +20,16 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   void captureFromContextMenu(info, tab);
 });
 
+chrome.runtime.onMessageExternal.addListener((request: unknown, sender, sendResponse) => {
+  void connectFromMind(request, sender)
+    .then(() => sendResponse({ ok: true }))
+    .catch((error: unknown) => sendResponse({
+      ok: false,
+      error: error instanceof Error ? error.message : "Mind could not connect this extension."
+    }));
+  return true;
+});
+
 async function configureExtension() {
   await chrome.storage.local.setAccessLevel({ accessLevel: "TRUSTED_CONTEXTS" });
   await chrome.contextMenus.removeAll();
@@ -28,6 +38,34 @@ async function configureExtension() {
     title: "Save to Mind",
     contexts: ["page", "link", "selection", "image"]
   });
+}
+
+async function connectFromMind(request: unknown, sender: chrome.runtime.MessageSender) {
+  if (!isTrustedMindSender(sender.url)) throw new Error("Connection request came from an untrusted page.");
+  if (!isConnectionRequest(request)) throw new Error("Mind sent an invalid connection request.");
+
+  const current = await readSettings();
+  await saveSettings({ ...current, token: request.token });
+}
+
+function isTrustedMindSender(senderUrl: string | undefined) {
+  if (!senderUrl) return false;
+  try {
+    const url = new URL(senderUrl);
+    return url.origin === "https://www.gocheski.com" && url.pathname === "/mind/extension/connect";
+  } catch {
+    return false;
+  }
+}
+
+function isConnectionRequest(value: unknown): value is { type: "gocheski-mind:connect"; token: string } {
+  if (!value || typeof value !== "object") return false;
+  const request = value as { type?: unknown; token?: unknown };
+  return request.type === "gocheski-mind:connect" &&
+    typeof request.token === "string" &&
+    request.token.startsWith("mind_ext_") &&
+    request.token.length >= 40 &&
+    request.token.length <= 100;
 }
 
 async function captureFromContextMenu(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
