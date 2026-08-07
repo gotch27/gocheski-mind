@@ -1070,6 +1070,179 @@ kbd {
   }
 }
 
+.landing-page {
+  width: min(100%, 1680px);
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 4vw, 64px) 34px;
+  background: var(--background);
+}
+
+.landing-nav {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.landing-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.landing-brand img {
+  display: block;
+  width: 43px;
+  height: 43px;
+  object-fit: contain;
+}
+
+.landing-login {
+  display: inline-flex;
+  min-width: 86px;
+  min-height: 42px;
+  padding: 0 18px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.landing-login:hover:not(:disabled) {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.landing-login:disabled,
+.landing-cta:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.landing-hero {
+  display: grid;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(74px, 10vw, 150px) 0 clamp(58px, 8vw, 108px);
+  justify-items: center;
+  text-align: center;
+}
+
+.landing-hero h1 {
+  margin: 0;
+  font-size: clamp(48px, 7.4vw, 116px);
+  font-weight: 500;
+  letter-spacing: -0.065em;
+  line-height: 0.91;
+}
+
+.landing-intro {
+  max-width: 570px;
+  margin: clamp(27px, 4vw, 44px) 0 0;
+  color: var(--muted-dark);
+  font-size: clamp(15px, 1.4vw, 19px);
+  line-height: 1.6;
+}
+
+.landing-cta {
+  display: inline-flex;
+  min-height: 56px;
+  margin-top: 34px;
+  padding: 0 23px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: white;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  background: var(--ink);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+  transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+}
+
+.landing-cta:hover:not(:disabled) {
+  color: var(--ink);
+  background: white;
+  transform: translateY(-2px);
+}
+
+.landing-error {
+  margin: 15px 0 -8px;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.landing-demo {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  background: var(--ink);
+  box-shadow: 0 28px 80px rgba(17, 17, 17, 0.13);
+}
+
+.landing-demo::before {
+  position: absolute;
+  z-index: 1;
+  top: 13px;
+  left: 13px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 16px 0 0 rgba(255, 255, 255, 0.38), 32px 0 0 rgba(255, 255, 255, 0.2);
+  content: "";
+  pointer-events: none;
+}
+
+.landing-demo video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.landing-footer {
+  display: flex;
+  min-height: 92px;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landing-footer a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.landing-footer a:hover {
+  color: var(--accent);
+}
+
 .auth-page {
   min-height: 100svh;
   padding: clamp(22px, 4vw, 48px);
@@ -1531,6 +1704,49 @@ kbd {
 }
 
 @media (max-width: 620px) {
+  .landing-page {
+    padding-inline: 14px;
+  }
+
+  .landing-nav {
+    min-height: 72px;
+  }
+
+  .landing-brand img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .landing-hero {
+    padding: 72px 0 58px;
+  }
+
+  .landing-hero h1 {
+    font-size: clamp(43px, 14vw, 68px);
+    line-height: 0.94;
+  }
+
+  .landing-intro {
+    max-width: 340px;
+    margin-top: 25px;
+    font-size: 14px;
+  }
+
+  .landing-cta {
+    width: 100%;
+    max-width: 340px;
+    margin-top: 28px;
+  }
+
+  .landing-demo {
+    aspect-ratio: 4 / 3;
+    border-radius: 6px;
+  }
+
+  .landing-footer {
+    min-height: 72px;
+  }
+
   .mind-shell {
     padding: 0 14px 60px;
   }

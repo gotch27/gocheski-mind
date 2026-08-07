@@ -7,9 +7,15 @@ const handleAuth = auth.middleware({
 });
 
 export default function proxy(request: NextRequest) {
+  if (request.nextUrl.searchParams.has("neon_auth_session_verifier")) {
+    return handleAuth(request);
+  }
+
   const publicPaths = new Set([
+    "/",
     "/privacy",
     "/extension/connect",
+    withBasePath("/"),
     withBasePath("/privacy"),
     withBasePath("/extension/connect")
   ]);
