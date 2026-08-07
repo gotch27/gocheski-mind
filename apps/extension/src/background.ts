@@ -69,8 +69,10 @@ function isConnectionRequest(value: unknown): value is { type: "gocheski-mind:co
 }
 
 async function captureFromContextMenu(info: chrome.contextMenus.OnClickData, tab?: chrome.tabs.Tab) {
+  let token = "";
   try {
     const settings = await readSettings();
+    token = settings.token;
     if (!settings.token) {
       await showToast(tab?.id, "error", "Connect Mind first", "Open the extension settings and paste your token.");
       await chrome.runtime.openOptionsPage();
@@ -110,6 +112,35 @@ async function captureFromContextMenu(info: chrome.contextMenus.OnClickData, tab
       "Mind could not save this",
       error instanceof Error ? truncate(error.message, 180) : "Try again."
     );
+    if (token) {
+      await reportExtensionError(token, error, {
+        operation: "capture",
+        contextType: String(info.mediaType ?? (info.selectionText ? "selection" : info.linkUrl ? "link" : "page"))
+      });
+    }
+  }
+}
+
+async function reportExtensionError(
+  token: string,
+  error: unknown,
+  context: Record<string, string | number | boolean | null>
+) {
+  const normalized = error instanceof Error
+    ? { message: error.message || error.name, stack: error.stack }
+    : { message: typeof error === "string" ? error : "Unknown extension error" };
+
+  try {
+    await fetch(`${API_BASE_URL}/api/extension/logs`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({ source: "extension.background", ...normalized, context })
+    });
+  } catch {
+    // A network failure cannot be reported through the same unavailable network.
   }
 }
 

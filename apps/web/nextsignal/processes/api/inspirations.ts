@@ -2,7 +2,6 @@ import {
   apiProcess,
   forwardFault,
   requireUser,
-  systemFail,
   validateWith,
   value
 } from "@gotch/nextsignal";
@@ -21,6 +20,7 @@ import {
 } from "@/nextsignal/schemas";
 import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
+import { loggedSystemFail } from "@/nextsignal/logging";
 
 type ListInspirationsTransportInput = Omit<InspirationListInput, "favorite" | "limit"> & {
   favorite?: boolean | "true" | "false";
@@ -79,7 +79,7 @@ export const createInspirationApi = apiProcess<
       input
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Create process returned no inspiration."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Create process returned no inspiration."));
     return value(result.data);
   }
 });
@@ -100,7 +100,7 @@ export const updateInspirationApi = apiProcess<UpdateInspirationInput, { inspira
       input
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Update process returned no inspiration."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Update process returned no inspiration."));
     return value({ inspiration: result.data });
   }
 });
@@ -121,7 +121,7 @@ export const deleteInspirationApi = apiProcess<InspirationIdInput, { id: string 
       input
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Delete process returned no identifier."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Delete process returned no identifier."));
     return value(result.data);
   }
 });

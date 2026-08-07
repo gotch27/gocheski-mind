@@ -2,8 +2,10 @@ import { blobService } from "@/nextsignal/services/blob";
 import { extensionTokenService } from "@/nextsignal/services/extension-tokens";
 import { inspirationService } from "@/nextsignal/services/inspirations";
 import { fetchLinkMetadata } from "@/nextsignal/services/link-metadata";
+import { applicationLogService } from "@/nextsignal/services/application-logs";
 
 export const services = {
+  applicationLogs: applicationLogService,
   inspirations: inspirationService,
   extensionTokens: extensionTokenService,
   linkMetadata: {

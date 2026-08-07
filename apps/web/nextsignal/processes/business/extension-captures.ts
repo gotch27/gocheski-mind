@@ -1,9 +1,10 @@
-import { businessProcess, forwardFault, ok, systemFail, value } from "@gotch/nextsignal";
+import { businessProcess, forwardFault, ok, value } from "@gotch/nextsignal";
 import type { ExtensionCaptureInput } from "@gocheski-mind/contracts";
 import { normalizeInspirationTitle, type CreateInspirationInput } from "@/lib/inspirations";
 import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
 import { createInspirationForOwner } from "@/nextsignal/processes/business/inspirations";
+import { loggedSystemFail } from "@/nextsignal/logging";
 
 export type OwnedExtensionCaptureInput = {
   ownerId: string;
@@ -28,7 +29,7 @@ export const captureFromExtensionBusiness = businessProcess<
     const createInput = await toCreateInput(ctx.services, input.ownerId, input.capture);
     const result = await createInspirationForOwner(ctx, input.ownerId, createInput);
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Create process returned no extension inspiration."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Create process returned no extension inspiration."));
     return value(result.data);
   }
 });

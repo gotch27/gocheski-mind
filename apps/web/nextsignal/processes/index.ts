@@ -23,8 +23,11 @@ import {
   listExtensionTokensBusiness,
   revokeExtensionTokenBusiness
 } from "@/nextsignal/processes/business/extension-tokens";
+import { reportExtensionErrorApi } from "@/nextsignal/processes/api/application-logs";
+import { recordExtensionErrorBusiness } from "@/nextsignal/processes/business/application-logs";
 
 export const processes = [
+  reportExtensionErrorApi,
   captureFromExtensionApi,
   listExtensionTokensApi,
   createExtensionTokenApi,
@@ -41,5 +44,6 @@ export const processes = [
   listInspirationsBusiness,
   createInspirationBusiness,
   updateInspirationBusiness,
-  deleteInspirationBusiness
+  deleteInspirationBusiness,
+  recordExtensionErrorBusiness
 ];

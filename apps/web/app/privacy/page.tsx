@@ -28,6 +28,12 @@ export default function PrivacyPage() {
             The extension stores its revocable access token and your optional default labels locally in Chrome. It
             does not continuously monitor browsing activity and has no persistent content script.
           </p>
+          <p>
+            When an operation fails, Mind may store a diagnostic log containing the error message, affected feature,
+            timestamp, account identifier, and limited technical context needed to investigate the failure. Complete
+            extension keys, authentication cookies, passwords, and other recognized secrets are redacted and are not
+            intentionally written to diagnostic logs.
+          </p>
         </section>
 
         <section>
@@ -63,7 +69,8 @@ export default function PrivacyPage() {
           <p>
             Inspirations remain in your account until you delete them. Extension access remains active until its key
             is revoked. You can delete inspirations from the board and revoke extension keys from the Extension panel.
-            You may request deletion of your account data through the contact options at gocheski.com.
+            Diagnostic logs are retained only as long as reasonably needed to operate, secure, and troubleshoot the
+            service. You may request deletion of your account data through the contact options at gocheski.com.
           </p>
         </section>
 

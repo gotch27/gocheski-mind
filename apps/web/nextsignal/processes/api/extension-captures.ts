@@ -1,7 +1,6 @@
 import {
   apiProcess,
   forwardFault,
-  systemFail,
   validateWith,
   value
 } from "@gotch/nextsignal";
@@ -11,6 +10,7 @@ import type { OwnedExtensionCaptureInput } from "@/nextsignal/processes/business
 import { extensionCaptureSchema } from "@/nextsignal/schemas";
 import type { AppServices } from "@/nextsignal/services";
 import type { CreateInspirationRecordResult } from "@/nextsignal/services/inspirations";
+import { loggedSystemFail } from "@/nextsignal/logging";
 
 export const captureFromExtensionApi = apiProcess<
   ExtensionCaptureInput,
@@ -32,7 +32,7 @@ export const captureFromExtensionApi = apiProcess<
       { ownerId: extensionOwnerId(ctx), capture: input }
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Extension capture returned no inspiration."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Extension capture returned no inspiration."));
     return value(result.data);
   }
 });

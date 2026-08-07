@@ -1,4 +1,4 @@
-import { apiProcess, forwardFault, requireUser, systemFail, validateWith, value } from "@gotch/nextsignal";
+import { apiProcess, forwardFault, requireUser, validateWith, value } from "@gotch/nextsignal";
 import type { CreatedExtensionToken, ExtensionToken } from "@/lib/extension-tokens";
 import {
   createExtensionTokenSchema,
@@ -7,6 +7,7 @@ import {
   type ExtensionTokenIdInput
 } from "@/nextsignal/schemas";
 import type { AppServices } from "@/nextsignal/services";
+import { loggedSystemFail } from "@/nextsignal/logging";
 
 export const listExtensionTokensApi = apiProcess<Record<string, never>, { items: ExtensionToken[] }, AppServices>({
   name: "extensionTokens.list",
@@ -38,7 +39,7 @@ export const createExtensionTokenApi = apiProcess<
       input
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Token creation returned no token."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Token creation returned no token."));
     return value({ item: result.data });
   }
 });
@@ -54,7 +55,7 @@ export const revokeExtensionTokenApi = apiProcess<ExtensionTokenIdInput, { id: s
       input
     );
     if (!result.ok) return forwardFault(result);
-    if (!result.data) return systemFail(new Error("Token revocation returned no identifier."));
+    if (!result.data) return loggedSystemFail(ctx, new Error("Token revocation returned no identifier."));
     return value(result.data);
   }
 });

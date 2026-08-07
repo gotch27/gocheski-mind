@@ -19,3 +19,10 @@ export type ExtensionCaptureResponse = {
   };
   duplicate: boolean;
 };
+
+export type ExtensionErrorReport = {
+  source: string;
+  message: string;
+  stack?: string;
+  context?: Record<string, string | number | boolean | null>;
+};

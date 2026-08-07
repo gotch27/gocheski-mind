@@ -92,7 +92,7 @@ export async function createInspirationForOwner(
         message: "Link metadata enrichment failed; saving the original URL.",
         process: ctx.metadata.processName,
         correlationId: ctx.metadata.correlationId,
-        data: { reason: error instanceof Error ? error.message : "Unknown error" }
+        data: { ownerId, reason: error instanceof Error ? error.message : "Unknown error" }
       });
     }
   }
@@ -138,7 +138,7 @@ export const deleteInspirationBusiness = businessProcess<InspirationIdInput, { i
           message: "The inspiration was deleted, but its Blob asset could not be removed.",
           process: ctx.metadata.processName,
           correlationId: ctx.metadata.correlationId,
-          data: { reason: error instanceof Error ? error.message : "Unknown error" }
+          data: { ownerId: await currentOwnerId(ctx), reason: error instanceof Error ? error.message : "Unknown error" }
         });
       }
     }

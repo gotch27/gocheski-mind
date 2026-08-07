@@ -1,8 +1,8 @@
-import { createNextRoute } from "@gotch/nextsignal/next";
 import { app } from "@/nextsignal/app";
+import { createLoggedNextRoute } from "@/lib/logged-route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export const GET = createNextRoute(app, "extensionTokens.list");
-export const POST = createNextRoute(app, "extensionTokens.create");
+export const GET = createLoggedNextRoute(app, "extensionTokens.list");
+export const POST = createLoggedNextRoute(app, "extensionTokens.create");

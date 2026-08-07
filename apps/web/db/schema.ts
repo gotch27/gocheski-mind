@@ -15,6 +15,30 @@ import type { InspirationMetadata } from "@/lib/inspirations";
 
 export const inspirationKind = pgEnum("inspiration_kind", ["link", "image", "note", "quote"]);
 
+export const applicationLogs = pgTable(
+  "application_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    level: varchar("level", { length: 10 }).notNull(),
+    source: varchar("source", { length: 120 }).notNull(),
+    message: text("message").notNull(),
+    process: varchar("process", { length: 160 }),
+    correlationId: varchar("correlation_id", { length: 100 }),
+    ownerId: text("owner_id"),
+    errorName: varchar("error_name", { length: 160 }),
+    errorMessage: text("error_message"),
+    stack: text("stack"),
+    context: jsonb("context").$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => [
+    index("application_logs_created_at_idx").on(table.createdAt),
+    index("application_logs_level_created_at_idx").on(table.level, table.createdAt),
+    index("application_logs_owner_created_at_idx").on(table.ownerId, table.createdAt),
+    index("application_logs_correlation_id_idx").on(table.correlationId)
+  ]
+);
+
 export const inspirations = pgTable(
   "inspirations",
   {

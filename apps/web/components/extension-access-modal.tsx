@@ -66,8 +66,12 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
 
   async function copyToken() {
     if (!created) return;
-    await navigator.clipboard.writeText(created.token);
-    setCopied(true);
+    try {
+      await navigator.clipboard.writeText(created.token);
+      setCopied(true);
+    } catch (cause) {
+      setError("The extension key could not be copied. Select and copy it manually.");
+    }
   }
 
   async function revokeToken(item: ExtensionToken) {

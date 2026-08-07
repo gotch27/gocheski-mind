@@ -2,6 +2,13 @@ import { z } from "zod";
 import { extensionCaptureTypes } from "@gocheski-mind/contracts";
 import { inspirationKinds, maximumInspirationTitleLength } from "@/lib/inspirations";
 
+export const extensionErrorReportSchema = z.object({
+  source: z.string().trim().min(1).max(120),
+  message: z.string().trim().min(1).max(1_000),
+  stack: z.string().max(8_000).optional(),
+  context: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional()
+});
+
 const optionalShortText = z.string().trim().max(maximumInspirationTitleLength).optional();
 const optionalLongText = z.string().trim().max(20_000).optional();
 const optionalUrl = z.string().trim().url().max(2_000).optional();
