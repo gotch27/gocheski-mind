@@ -5,6 +5,14 @@ import { useState } from "react";
 import { getAuthClient } from "@/app/lib/auth-client";
 import { withBasePath } from "@/lib/base-path";
 
+const productionMediaBaseUrl = "https://gocheski-mind.vercel.app/mind";
+
+function getDemoMediaUrl(fileName: string) {
+  return process.env.NODE_ENV === "production"
+    ? `${productionMediaBaseUrl}/${fileName}`
+    : withBasePath(`/${fileName}`);
+}
+
 export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
@@ -65,7 +73,7 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
         <span className="landing-tape landing-tape-bottom" aria-hidden="true" />
         <img
           className="landing-demo-preview"
-          src={withBasePath("/mind-demo-poster-v1.jpg")}
+          src={getDemoMediaUrl("mind-demo-poster-v1.jpg")}
           alt=""
           aria-hidden="true"
           loading="eager"
@@ -77,13 +85,21 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
           loop
           playsInline
           preload="auto"
-          poster={withBasePath("/mind-demo-poster-v1.jpg")}
+          poster={getDemoMediaUrl("mind-demo-poster-v1.jpg")}
+          onCanPlay={(event) => {
+            void event.currentTarget.play().catch(() => setVideoPlaying(false));
+          }}
           onPlaying={() => setVideoPlaying(true)}
           onPause={() => setVideoPlaying(false)}
           onWaiting={() => setVideoPlaying(false)}
           onError={() => setVideoPlaying(false)}
         >
-          <source src={withBasePath("/mind-demo-v1.mp4")} type="video/mp4" />
+          <source
+            src={getDemoMediaUrl("mind-demo-mobile-v1.mp4")}
+            type="video/mp4"
+            media="(max-width: 620px)"
+          />
+          <source src={getDemoMediaUrl("mind-demo-v1.mp4")} type="video/mp4" />
           Your browser does not support HTML video.
         </video>
       </section>
