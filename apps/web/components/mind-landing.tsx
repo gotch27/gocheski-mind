@@ -61,14 +61,13 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
 
       <section className="landing-demo" aria-label="Gocheski Mind product demo">
         <video
-          controls
+          autoPlay
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={withBasePath("/og.jpg")}
+          preload="auto"
         >
-          <source src={withBasePath("/mind-demo.mp4")} type="video/mp4" />
+          <source src={withBasePath("/mind-demo-v1.mp4")} type="video/mp4" />
           Your browser does not support HTML video.
         </video>
       </section>
