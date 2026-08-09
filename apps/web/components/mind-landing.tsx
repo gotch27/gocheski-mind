@@ -94,11 +94,6 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
           onWaiting={() => setVideoPlaying(false)}
           onError={() => setVideoPlaying(false)}
         >
-          <source
-            src={getDemoMediaUrl("mind-demo-mobile-v1.mp4")}
-            type="video/mp4"
-            media="(max-width: 620px)"
-          />
           <source src={getDemoMediaUrl("mind-demo-v1.mp4")} type="video/mp4" />
           Your browser does not support HTML video.
         </video>

@@ -18,15 +18,6 @@ const nextConfig: NextConfig = {
         ]
       },
       {
-        source: "/mind-demo-mobile-v1.mp4",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable"
-          }
-        ]
-      },
-      {
         source: "/mind-demo-poster-v1.jpg",
         headers: [
           {
