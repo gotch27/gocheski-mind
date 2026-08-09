@@ -1343,18 +1343,17 @@ kbd {
   width: clamp(100px, 10vw, 158px);
   height: clamp(30px, 3.2vw, 46px);
   background:
-    linear-gradient(101deg, rgba(255, 255, 255, 0.22), transparent 29%, rgba(17, 17, 17, 0.08) 52%, transparent 68%, rgba(255, 255, 255, 0.16)),
-    repeating-linear-gradient(3deg, rgba(255, 255, 255, 0.07) 0 1px, rgba(17, 17, 17, 0.025) 1px 3px),
-    rgba(255, 107, 0, 0.72);
+    linear-gradient(94deg, rgba(255, 255, 255, 0.15), transparent 21%, transparent 47%, rgba(17, 17, 17, 0.07) 51%, transparent 56%, rgba(255, 255, 255, 0.12) 84%, transparent),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.045) 0 1px, rgba(17, 17, 17, 0.018) 1px 3px),
+    rgba(255, 107, 0, 0.7);
   box-shadow:
-    0 10px 16px rgba(17, 17, 17, 0.18),
-    0 3px 5px rgba(17, 17, 17, 0.16),
-    inset 0 1px rgba(255, 255, 255, 0.32),
-    inset 0 -1px rgba(17, 17, 17, 0.11);
-  clip-path: polygon(0 13%, 5% 4%, 11% 10%, 18% 2%, 25% 9%, 32% 3%, 40% 8%, 48% 1%, 57% 8%, 66% 2%, 74% 9%, 82% 3%, 90% 10%, 96% 4%, 100% 14%, 97% 91%, 91% 97%, 84% 91%, 76% 99%, 67% 92%, 59% 98%, 50% 91%, 41% 99%, 33% 92%, 24% 98%, 16% 91%, 8% 97%, 2% 90%);
+    0 8px 14px rgba(17, 17, 17, 0.15),
+    0 2px 4px rgba(17, 17, 17, 0.12),
+    inset 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 -1px rgba(17, 17, 17, 0.08);
+  clip-path: polygon(2% 0, 98% 0, 99% 8%, 97% 17%, 100% 27%, 98% 38%, 100% 49%, 97% 59%, 99% 70%, 97% 81%, 100% 91%, 98% 100%, 2% 100%, 1% 92%, 3% 82%, 0 72%, 2% 61%, 0 50%, 3% 39%, 1% 29%, 3% 19%, 0 9%);
   pointer-events: none;
-  transform-style: preserve-3d;
-  backdrop-filter: blur(0.7px);
+  backdrop-filter: blur(0.5px);
 }
 
 .landing-tape::before,
@@ -1365,25 +1364,25 @@ kbd {
 }
 
 .landing-tape::before {
-  background: linear-gradient(87deg, transparent 16%, rgba(255, 255, 255, 0.2) 18%, transparent 22%, transparent 61%, rgba(17, 17, 17, 0.08) 64%, transparent 68%);
+  background: linear-gradient(89deg, transparent 17%, rgba(255, 255, 255, 0.15) 20%, transparent 24%, transparent 63%, rgba(17, 17, 17, 0.06) 65%, transparent 69%);
   mix-blend-mode: soft-light;
 }
 
 .landing-tape::after {
-  opacity: 0.36;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 35%, rgba(17, 17, 17, 0.12));
+  opacity: 0.3;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 42%, rgba(17, 17, 17, 0.08));
 }
 
 .landing-tape-top {
   top: clamp(-19px, -1.2vw, -12px);
   right: clamp(-29px, -1.8vw, -18px);
-  transform: rotate(40deg) perspective(220px) rotateY(-7deg);
+  transform: rotate(40deg);
 }
 
 .landing-tape-bottom {
   bottom: clamp(-19px, -1.2vw, -12px);
   left: clamp(-29px, -1.8vw, -18px);
-  transform: rotate(40deg) perspective(220px) rotateY(7deg);
+  transform: rotate(40deg);
 }
 
 .landing-footer {
