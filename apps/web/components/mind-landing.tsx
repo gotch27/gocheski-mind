@@ -60,6 +60,8 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
       </section>
 
       <section className="landing-demo" aria-label="Gocheski Mind product demo">
+        <span className="landing-tape landing-tape-top" aria-hidden="true" />
+        <span className="landing-tape landing-tape-bottom" aria-hidden="true" />
         <video
           autoPlay
           muted

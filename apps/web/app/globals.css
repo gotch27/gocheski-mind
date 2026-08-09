@@ -1306,7 +1306,7 @@ kbd {
 
 .landing-demo {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   aspect-ratio: 16 / 9;
   border: 1px solid var(--ink);
@@ -1333,7 +1333,57 @@ kbd {
   display: block;
   width: 100%;
   height: 100%;
+  border-radius: inherit;
   object-fit: cover;
+}
+
+.landing-tape {
+  position: absolute;
+  z-index: 4;
+  width: clamp(100px, 10vw, 158px);
+  height: clamp(30px, 3.2vw, 46px);
+  background:
+    linear-gradient(101deg, rgba(255, 255, 255, 0.22), transparent 29%, rgba(17, 17, 17, 0.08) 52%, transparent 68%, rgba(255, 255, 255, 0.16)),
+    repeating-linear-gradient(3deg, rgba(255, 255, 255, 0.07) 0 1px, rgba(17, 17, 17, 0.025) 1px 3px),
+    rgba(255, 107, 0, 0.72);
+  box-shadow:
+    0 10px 16px rgba(17, 17, 17, 0.18),
+    0 3px 5px rgba(17, 17, 17, 0.16),
+    inset 0 1px rgba(255, 255, 255, 0.32),
+    inset 0 -1px rgba(17, 17, 17, 0.11);
+  clip-path: polygon(0 13%, 5% 4%, 11% 10%, 18% 2%, 25% 9%, 32% 3%, 40% 8%, 48% 1%, 57% 8%, 66% 2%, 74% 9%, 82% 3%, 90% 10%, 96% 4%, 100% 14%, 97% 91%, 91% 97%, 84% 91%, 76% 99%, 67% 92%, 59% 98%, 50% 91%, 41% 99%, 33% 92%, 24% 98%, 16% 91%, 8% 97%, 2% 90%);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  backdrop-filter: blur(0.7px);
+}
+
+.landing-tape::before,
+.landing-tape::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.landing-tape::before {
+  background: linear-gradient(87deg, transparent 16%, rgba(255, 255, 255, 0.2) 18%, transparent 22%, transparent 61%, rgba(17, 17, 17, 0.08) 64%, transparent 68%);
+  mix-blend-mode: soft-light;
+}
+
+.landing-tape::after {
+  opacity: 0.36;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 35%, rgba(17, 17, 17, 0.12));
+}
+
+.landing-tape-top {
+  top: clamp(-19px, -1.2vw, -12px);
+  right: clamp(-29px, -1.8vw, -18px);
+  transform: rotate(40deg) perspective(220px) rotateY(-7deg);
+}
+
+.landing-tape-bottom {
+  bottom: clamp(-19px, -1.2vw, -12px);
+  left: clamp(-29px, -1.8vw, -18px);
+  transform: rotate(40deg) perspective(220px) rotateY(7deg);
 }
 
 .landing-footer {
@@ -2126,6 +2176,21 @@ kbd {
   .landing-demo {
     aspect-ratio: 4 / 3;
     border-radius: 6px;
+  }
+
+  .landing-tape {
+    width: 90px;
+    height: 28px;
+  }
+
+  .landing-tape-top {
+    top: -11px;
+    right: -18px;
+  }
+
+  .landing-tape-bottom {
+    bottom: -11px;
+    left: -18px;
   }
 
   .landing-footer {
