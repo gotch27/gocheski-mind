@@ -8,6 +8,7 @@ import { withBasePath } from "@/lib/base-path";
 export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   async function login() {
     if (submitting) return;
@@ -62,12 +63,25 @@ export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
       <section className="landing-demo" aria-label="Gocheski Mind product demo">
         <span className="landing-tape landing-tape-top" aria-hidden="true" />
         <span className="landing-tape landing-tape-bottom" aria-hidden="true" />
+        <img
+          className="landing-demo-preview"
+          src={withBasePath("/mind-demo-poster-v1.jpg")}
+          alt=""
+          aria-hidden="true"
+          loading="eager"
+        />
         <video
+          className={videoPlaying ? "is-playing" : undefined}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
+          poster={withBasePath("/mind-demo-poster-v1.jpg")}
+          onPlaying={() => setVideoPlaying(true)}
+          onPause={() => setVideoPlaying(false)}
+          onWaiting={() => setVideoPlaying(false)}
+          onError={() => setVideoPlaying(false)}
         >
           <source src={withBasePath("/mind-demo-v1.mp4")} type="video/mp4" />
           Your browser does not support HTML video.

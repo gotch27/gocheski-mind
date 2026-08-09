@@ -1317,7 +1317,7 @@ kbd {
 
 .landing-demo::before {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   top: 13px;
   left: 13px;
   width: 8px;
@@ -1329,12 +1329,29 @@ kbd {
   pointer-events: none;
 }
 
+.landing-demo-preview,
 .landing-demo video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   border-radius: inherit;
   object-fit: cover;
+}
+
+.landing-demo-preview {
+  z-index: 1;
+}
+
+.landing-demo video {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.landing-demo video.is-playing {
+  opacity: 1;
 }
 
 .landing-tape {
@@ -2261,7 +2278,20 @@ kbd {
   }
 
   .topbar {
+    grid-template-columns: auto minmax(0, 1fr);
     min-height: 72px;
+  }
+
+  .brand {
+    grid-row: 1;
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .topbar-actions {
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
   }
 
   .brand,
