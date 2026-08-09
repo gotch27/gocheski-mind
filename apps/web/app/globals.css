@@ -826,6 +826,7 @@ kbd {
 .saved-url-row,
 .url-editor-row {
   display: grid;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
@@ -834,34 +835,33 @@ kbd {
 .saved-url-link {
   display: flex;
   min-width: 0;
-  height: 46px;
-  padding: 0 13px;
+  min-height: 46px;
+  padding: 0;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 0;
   overflow: hidden;
-  color: var(--ink);
-  border: 1px solid #c8c8c8;
-  border-radius: 3px;
-  background: #fafafa;
-  font-size: 12px;
-  text-decoration: none;
+  color: var(--accent);
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .saved-url-link span {
+  min-width: 0;
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.saved-url-link svg {
-  flex: 0 0 auto;
-}
-
 .saved-url-link:hover,
 .saved-url-link:focus-visible {
-  border-color: var(--ink);
-  background: white;
+  color: #d95b00;
 }
 
 .url-edit-button {

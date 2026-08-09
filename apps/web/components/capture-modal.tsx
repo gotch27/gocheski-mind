@@ -1,7 +1,7 @@
 "use client";
 
 import { upload } from "@vercel/blob/client";
-import { ArrowUpRight, LoaderCircle, Pencil, Upload, X } from "lucide-react";
+import { LoaderCircle, Pencil, Upload, X } from "lucide-react";
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import type { ApiResult, Inspiration, InspirationKind } from "@/lib/inspirations";
 import { readApiError } from "@/lib/api";
@@ -192,7 +192,6 @@ export function CaptureModal({ open, ownerId, initial, onClose, onSaved }: Captu
                 <div className="saved-url-row">
                   <a className="saved-url-link" href={sourceUrl} target="_blank" rel="noreferrer" title={sourceUrl}>
                     <span>{sourceUrl}</span>
-                    <ArrowUpRight size={16} aria-hidden="true" />
                   </a>
                   <button className="url-edit-button" type="button" onClick={() => setEditingSourceUrl(true)}>
                     <Pencil size={14} aria-hidden="true" />
