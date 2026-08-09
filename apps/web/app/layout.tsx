@@ -25,13 +25,13 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       title: "Gocheski Mind",
       description: "Keep what moves you.",
-      images: [{ url: `${appBasePath}/og.jpg`, width: 1200, height: 630, alt: "Gocheski Mind — Keep what moves you." }]
+      images: [{ url: `${appBasePath}/og-v2.jpg`, width: 1200, height: 630, alt: "Gocheski Mind — Keep what moves you." }]
     },
     twitter: {
       card: "summary_large_image",
       title: "Gocheski Mind",
       description: "Keep what moves you.",
-      images: [`${appBasePath}/og.jpg`]
+      images: [`${appBasePath}/og-v2.jpg`]
     },
     robots: {
       index: false,
