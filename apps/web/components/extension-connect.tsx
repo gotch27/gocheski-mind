@@ -6,8 +6,7 @@ import type { CreatedExtensionToken } from "@/lib/extension-tokens";
 import type { ApiResult } from "@/lib/inspirations";
 import { readApiError } from "@/lib/api";
 import { withBasePath } from "@/lib/base-path";
-
-const extensionId = "ecnghadaoncoimohifncimlgpacnicom";
+import { CHROME_WEB_STORE_URL, PUBLISHED_EXTENSION_ID } from "@/lib/extension";
 
 type ConnectionResponse = {
   ok?: boolean;
@@ -27,11 +26,13 @@ export function ExtensionConnect({ email }: { email: string }) {
   const [consented, setConsented] = useState(false);
   const [status, setStatus] = useState<"idle" | "connecting" | "connected">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [extensionUnavailable, setExtensionUnavailable] = useState(false);
 
   async function connect() {
     if (!consented || status === "connecting") return;
     setStatus("connecting");
     setError(null);
+    setExtensionUnavailable(false);
 
     let created: CreatedExtensionToken | null = null;
     try {
@@ -51,7 +52,11 @@ export function ExtensionConnect({ email }: { email: string }) {
         await fetch(withBasePath(`/api/extension/tokens/${created.id}`), { method: "DELETE" }).catch(() => undefined);
       }
       setStatus("idle");
-      setError(cause instanceof Error ? cause.message : "The extension could not be connected.");
+      if (cause instanceof ExtensionUnavailableError) {
+        setExtensionUnavailable(true);
+      } else {
+        setError(cause instanceof Error ? cause.message : "The extension could not be connected.");
+      }
     }
   }
 
@@ -90,10 +95,27 @@ export function ExtensionConnect({ email }: { email: string }) {
           <span>I understand what is sent and want to connect this extension.</span>
         </label>
 
-        <button className="primary-button connect-submit" type="button" disabled={!consented || status === "connecting"} onClick={() => void connect()}>
-          {status === "connecting" ? <LoaderCircle className="spin" size={18} /> : <Plug size={18} />}
-          {status === "connecting" ? "Connecting…" : "Connect extension"}
-        </button>
+        {!extensionUnavailable ? (
+          <button className="primary-button connect-submit" type="button" disabled={!consented || status === "connecting"} onClick={() => void connect()}>
+            {status === "connecting" ? <LoaderCircle className="spin" size={18} /> : <Plug size={18} />}
+            {status === "connecting" ? "Connecting…" : "Connect extension"}
+          </button>
+        ) : null}
+
+        {extensionUnavailable ? (
+          <section className="extension-install-help" role="alert">
+            <strong>Extension not detected</strong>
+            <p>Install it from the Chrome Web Store, then return here and reload this page.</p>
+            <div>
+              <a className="primary-button" href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                Install extension <ExternalLink size={14} />
+              </a>
+              <button className="secondary-button" type="button" onClick={() => window.location.reload()}>
+                I installed it — reload
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         {error ? <p className="form-error" role="alert">{error}</p> : null}
 
@@ -111,14 +133,14 @@ export function ExtensionConnect({ email }: { email: string }) {
 function sendConnectionToken(token: string) {
   const runtime = (window as Window & { chrome?: { runtime?: ExternalRuntime } }).chrome?.runtime;
   if (!runtime) {
-    throw new Error("Open this page in Chrome with the Gocheski Mind extension installed.");
+    throw new ExtensionUnavailableError();
   }
 
   return new Promise<void>((resolve, reject) => {
-    runtime.sendMessage(extensionId, { type: "gocheski-mind:connect", token }, (response) => {
+    runtime.sendMessage(PUBLISHED_EXTENSION_ID, { type: "gocheski-mind:connect", token }, (response) => {
       const runtimeError = runtime.lastError?.message;
       if (runtimeError) {
-        reject(new Error("Install or reload the Gocheski Mind extension, then try again."));
+        reject(new ExtensionUnavailableError());
         return;
       }
       if (!response?.ok) {
@@ -128,4 +150,11 @@ function sendConnectionToken(token: string) {
       resolve();
     });
   });
+}
+
+class ExtensionUnavailableError extends Error {
+  constructor() {
+    super("The Gocheski Mind extension is not installed or this page needs to be reloaded.");
+    this.name = "ExtensionUnavailableError";
+  }
 }

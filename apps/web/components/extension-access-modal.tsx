@@ -6,6 +6,7 @@ import type { CreatedExtensionToken, ExtensionToken } from "@/lib/extension-toke
 import type { ApiResult } from "@/lib/inspirations";
 import { readApiError } from "@/lib/api";
 import { withBasePath } from "@/lib/base-path";
+import { CHROME_WEB_STORE_URL } from "@/lib/extension";
 
 type ExtensionAccessModalProps = {
   open: boolean;
@@ -106,12 +107,17 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
         <div className="extension-modal-body">
           <section className="automatic-connect-panel">
             <div>
-              <strong>Recommended</strong>
-              <p>Connect the Chrome Web Store extension without copying a key.</p>
+              <strong>Chrome extension</strong>
+              <p>Install it once, then securely connect this browser to your Mind.</p>
             </div>
-            <a className="primary-button" href={withBasePath("/extension/connect")}>
-              Connect this browser <ExternalLink size={15} />
-            </a>
+            <div className="automatic-connect-actions">
+              <a className="secondary-button" href={CHROME_WEB_STORE_URL} target="_blank" rel="noreferrer">
+                Install extension <ExternalLink size={15} />
+              </a>
+              <a className="primary-button" href={withBasePath("/extension/connect")}>
+                Connect installed extension
+              </a>
+            </div>
           </section>
 
           <p className="manual-token-heading">Manual keys</p>
