@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  ArrowUp,
   LoaderCircle,
   LogOut,
   Plug,
   Plus,
   Search,
+  ShieldCheck,
   Sparkles,
   X
 } from "lucide-react";
@@ -14,6 +16,7 @@ import type { ApiResult, Inspiration, InspirationKind } from "@/lib/inspirations
 import { readApiError } from "@/lib/api";
 import { withBasePath } from "@/lib/base-path";
 import { CaptureModal } from "@/components/capture-modal";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { InspirationCard } from "@/components/inspiration-card";
 import { ExtensionAccessModal } from "@/components/extension-access-modal";
 
@@ -52,7 +55,7 @@ const EMPTY_FILTER_COPY: Record<Exclude<Filter, "all">, { title: string; descrip
 };
 
 type MindAppProps = {
-  user: { id: string; name: string; email: string };
+  user: { id: string; name: string; email: string; isAdmin: boolean };
 };
 
 export function MindApp({ user }: MindAppProps) {
@@ -67,7 +70,11 @@ export function MindApp({ user }: MindAppProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Inspiration | null>(null);
   const [extensionModalOpen, setExtensionModalOpen] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<Inspiration | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -130,6 +137,16 @@ export function MindApp({ user }: MindAppProps) {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    function updateScrollButton() {
+      setShowScrollTop(window.scrollY > 420);
+    }
+
+    updateScrollButton();
+    window.addEventListener("scroll", updateScrollButton, { passive: true });
+    return () => window.removeEventListener("scroll", updateScrollButton);
+  }, []);
+
   function handleSaved(saved: Inspiration, message: string) {
     setItems((current) => {
       const exists = current.some((item) => item.id === saved.id);
@@ -162,15 +179,19 @@ export function MindApp({ user }: MindAppProps) {
   }
 
   async function deleteItem(item: Inspiration) {
-    if (!window.confirm("Remove this inspiration from your archive?")) return;
+    setDeleting(true);
+    setDeleteError(null);
     try {
       const response = await fetch(withBasePath(`/api/inspirations/${item.id}`), { method: "DELETE" });
       const result = (await response.json()) as ApiResult<{ id: string }>;
       if (!response.ok || !result.ok) throw new Error(readApiError(result));
       setItems((current) => current.filter((entry) => entry.id !== item.id));
+      setPendingDelete(null);
       setToast("Inspiration removed.");
     } catch {
-      setToast("That inspiration could not be removed.");
+      setDeleteError("That inspiration could not be removed. Please try again.");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -219,13 +240,19 @@ export function MindApp({ user }: MindAppProps) {
           )}
         </label>
 
-        <a className="brand" href="#top" aria-label="Gocheski Mind home">
+        <a className="brand" href={withBasePath("/welcome")} aria-label="Open the Gocheski Mind landing page">
           <span className="brand-logo-frame" aria-hidden="true">
             <img className="brand-logo" src={withBasePath("/gajret-logo.svg")} alt="" draggable="false" />
           </span>
         </a>
 
         <div className="topbar-actions">
+          {user.isAdmin ? (
+            <a className="logout-button admin-nav-button" href={withBasePath("/admin")}>
+              <ShieldCheck size={17} />
+              <span>Admin</span>
+            </a>
+          ) : null}
           <button className="logout-button" type="button" onClick={() => setExtensionModalOpen(true)}>
             <Plug size={17} />
             <span>Extension</span>
@@ -336,7 +363,10 @@ export function MindApp({ user }: MindAppProps) {
                 setModalOpen(true);
               }}
               onFavorite={() => void toggleFavorite(item)}
-              onDelete={() => void deleteItem(item)}
+              onDelete={() => {
+                setDeleteError(null);
+                setPendingDelete(item);
+              }}
             />
           ))}
         </section>
@@ -354,6 +384,35 @@ export function MindApp({ user }: MindAppProps) {
       />
 
       <ExtensionAccessModal open={extensionModalOpen} onClose={() => setExtensionModalOpen(false)} />
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Delete this inspiration?"
+        description="This will permanently remove it from your Mind. This action cannot be undone."
+        confirmLabel="Delete inspiration"
+        busyLabel="Deleting…"
+        busy={deleting}
+        error={deleteError}
+        onCancel={() => {
+          if (deleting) return;
+          setPendingDelete(null);
+          setDeleteError(null);
+        }}
+        onConfirm={() => {
+          if (pendingDelete) void deleteItem(pendingDelete);
+        }}
+      />
+
+      {showScrollTop ? (
+        <button
+          className="scroll-top-button"
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+        >
+          <ArrowUp size={19} />
+        </button>
+      ) : null}
 
       {toast ? <div className="toast" role="status">{toast}</div> : null}
     </main>

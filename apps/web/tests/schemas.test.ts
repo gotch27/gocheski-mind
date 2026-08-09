@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { maximumInspirationTitleLength, normalizeInspirationTitle } from "@/lib/inspirations";
-import { createInspirationSchema, extensionCaptureSchema, listInspirationsSchema } from "@/nextsignal/schemas";
+import {
+  createInspirationSchema,
+  extensionCaptureSchema,
+  listInspirationsSchema,
+  setUserBlockedSchema
+} from "@/nextsignal/schemas";
 
 describe("extensionCaptureSchema", () => {
   it.each(["page", "link", "selection", "image"] as const)("accepts a valid %s capture", (type) => {
@@ -56,5 +61,22 @@ describe("listInspirationsSchema", () => {
 
   it("accepts normalized values during mediator dispatch", () => {
     expect(listInspirationsSchema.safeParse({ favorite: true, tag: "design", limit: 40 }).success).toBe(true);
+  });
+});
+
+describe("setUserBlockedSchema", () => {
+  it("accepts a user id and explicit block state", () => {
+    expect(setUserBlockedSchema.safeParse({
+      id: "52a8d9f2-ddc6-45cc-9992-0274714da142",
+      blocked: true
+    }).success).toBe(true);
+  });
+
+  it("rejects missing and non-boolean block states", () => {
+    expect(setUserBlockedSchema.safeParse({ id: "52a8d9f2-ddc6-45cc-9992-0274714da142" }).success).toBe(false);
+    expect(setUserBlockedSchema.safeParse({
+      id: "52a8d9f2-ddc6-45cc-9992-0274714da142",
+      blocked: "true"
+    }).success).toBe(false);
   });
 });

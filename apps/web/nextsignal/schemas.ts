@@ -99,6 +99,12 @@ export const createExtensionTokenSchema = z.object({
 
 export const extensionTokenIdSchema = z.object({ id: z.uuid() });
 
+export const setUserBlockedSchema = z.object({
+  id: z.uuid(),
+  blocked: z.boolean()
+});
+
 export type InspirationIdInput = z.infer<typeof inspirationIdSchema>;
 export type CreateExtensionTokenInput = z.infer<typeof createExtensionTokenSchema>;
 export type ExtensionTokenIdInput = z.infer<typeof extensionTokenIdSchema>;
+export type SetUserBlockedInput = z.infer<typeof setUserBlockedSchema>;

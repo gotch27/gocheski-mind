@@ -28,7 +28,6 @@ The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Verce
    - `BLOB_READ_WRITE_TOKEN` — token for a public Vercel Blob store.
    - `NEON_AUTH_BASE_URL` — Auth URL shown after enabling Neon Auth.
    - `NEON_AUTH_COOKIE_SECRET` — random secret of at least 32 characters used for cached session cookies.
-   - `MIND_ALLOWED_EMAILS` — comma-separated Google addresses allowed into the app; leave empty for open registration.
 
 3. Apply the committed database migration and start the app:
 
@@ -68,7 +67,7 @@ Run `npm run db:migrate` against the production Neon database before using a mig
 
 ## Authentication and capture security
 
-The board uses Neon Auth with Google OAuth. Every inspiration, label, duplicate check, upload, edit, and delete is scoped to the authenticated Neon user ID.
+The board uses Neon Auth with Google OAuth. Registration is open, every inspiration and extension token is scoped to the authenticated Neon user ID, and `gorazdfilipovski@gmail.com` is the sole Mind administrator. The administrator can block users from `/mind/admin`; blocking revokes their active web sessions and Chrome extension keys.
 
 After the original owner signs in once, transfer pre-authentication records from the Neon SQL Editor. First find the user ID:
 

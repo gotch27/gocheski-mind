@@ -25,8 +25,15 @@ import {
 } from "@/nextsignal/processes/business/extension-tokens";
 import { reportExtensionErrorApi } from "@/nextsignal/processes/api/application-logs";
 import { recordExtensionErrorBusiness } from "@/nextsignal/processes/business/application-logs";
+import { listAdminUsersApi, setAdminUserBlockedApi } from "@/nextsignal/processes/api/admin-users";
+import {
+  listAdminUsersBusiness,
+  setAdminUserBlockedBusiness
+} from "@/nextsignal/processes/business/admin-users";
 
 export const processes = [
+  listAdminUsersApi,
+  setAdminUserBlockedApi,
   reportExtensionErrorApi,
   captureFromExtensionApi,
   listExtensionTokensApi,
@@ -45,5 +52,7 @@ export const processes = [
   createInspirationBusiness,
   updateInspirationBusiness,
   deleteInspirationBusiness,
+  listAdminUsersBusiness,
+  setAdminUserBlockedBusiness,
   recordExtensionErrorBusiness
 ];

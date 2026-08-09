@@ -5,12 +5,16 @@ import { useState } from "react";
 import { getAuthClient } from "@/app/lib/auth-client";
 import { withBasePath } from "@/lib/base-path";
 
-export function MindLanding() {
+export function MindLanding({ signedIn = false }: { signedIn?: boolean }) {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
 
   async function login() {
     if (submitting) return;
+    if (signedIn) {
+      window.location.assign(withBasePath("/"));
+      return;
+    }
     setSubmitting(true);
     setMessage("");
 
@@ -31,14 +35,14 @@ export function MindLanding() {
   return (
     <main className="landing-page">
       <header className="landing-nav">
-        <a className="landing-brand" href={withBasePath("/")} aria-label="Gocheski Mind home">
+        <a className="landing-brand" href={signedIn ? withBasePath("/welcome") : withBasePath("/")} aria-label="Gocheski Mind home">
           <img src={withBasePath("/gajret-logo.svg")} alt="" aria-hidden="true" />
           <span>Gocheski Mind</span>
         </a>
 
         <button className="landing-login" type="button" onClick={() => void login()} disabled={submitting}>
           {submitting ? <LoaderCircle className="spin" size={16} /> : null}
-          {submitting ? "Opening…" : "Log in"}
+          {submitting ? "Opening…" : signedIn ? "Open Mind" : "Log in"}
         </button>
       </header>
 

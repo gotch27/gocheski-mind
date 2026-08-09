@@ -14,9 +14,11 @@ export default function proxy(request: NextRequest) {
   const publicPaths = new Set([
     "/",
     "/privacy",
+    "/welcome",
     "/extension/connect",
     withBasePath("/"),
     withBasePath("/privacy"),
+    withBasePath("/welcome"),
     withBasePath("/extension/connect")
   ]);
   if (publicPaths.has(request.nextUrl.pathname)) {

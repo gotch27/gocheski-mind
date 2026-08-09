@@ -7,6 +7,7 @@ import type { ApiResult } from "@/lib/inspirations";
 import { readApiError } from "@/lib/api";
 import { withBasePath } from "@/lib/base-path";
 import { CHROME_WEB_STORE_URL } from "@/lib/extension";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 type ExtensionAccessModalProps = {
   open: boolean;
@@ -18,6 +19,9 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
   const [created, setCreated] = useState<CreatedExtensionToken | null>(null);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [pendingRevoke, setPendingRevoke] = useState<ExtensionToken | null>(null);
+  const [revoking, setRevoking] = useState(false);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,24 +80,28 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
   }
 
   async function revokeToken(item: ExtensionToken) {
-    if (!window.confirm(`Revoke ${item.name}? The connected extension will stop working.`)) return;
-    setError(null);
+    setRevoking(true);
+    setRevokeError(null);
     try {
       const response = await fetch(withBasePath(`/api/extension/tokens/${item.id}`), { method: "DELETE" });
       const result = (await response.json()) as ApiResult<{ id: string }>;
       if (!response.ok || !result.ok) throw new Error(readApiError(result));
       setItems((current) => current.filter((entry) => entry.id !== item.id));
       if (created?.id === item.id) setCreated(null);
+      setPendingRevoke(null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "The token could not be revoked.");
+      setRevokeError(cause instanceof Error ? cause.message : "The key could not be revoked.");
+    } finally {
+      setRevoking(false);
     }
   }
 
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget && !creating) onClose();
-    }}>
-      <section className="capture-modal extension-modal" role="dialog" aria-modal="true" aria-labelledby="extension-title">
+    <>
+      <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !creating) onClose();
+      }}>
+        <section className="capture-modal extension-modal" role="dialog" aria-modal="true" aria-labelledby="extension-title">
         <header className="modal-header">
           <div>
             <h2 id="extension-title">Connect the extension</h2>
@@ -153,7 +161,14 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
                       <strong>{item.name}</strong>
                       <span>{item.tokenPrefix} · {item.lastUsedAt ? `used ${formatDate(item.lastUsedAt)}` : "never used"}</span>
                     </div>
-                    <button type="button" onClick={() => void revokeToken(item)} aria-label={`Revoke ${item.name}`}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRevokeError(null);
+                        setPendingRevoke(item);
+                      }}
+                      aria-label={`Revoke ${item.name}`}
+                    >
                       <Trash2 size={16} />
                     </button>
                   </li>
@@ -166,8 +181,27 @@ export function ExtensionAccessModal({ open, onClose }: ExtensionAccessModalProp
 
           {error ? <p className="form-error" role="alert">{error}</p> : null}
         </div>
-      </section>
-    </div>
+        </section>
+      </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingRevoke)}
+        title="Revoke this extension key?"
+        description={`${pendingRevoke?.name ?? "This browser"} will immediately lose access to Mind.`}
+        confirmLabel="Revoke key"
+        busyLabel="Revoking…"
+        busy={revoking}
+        error={revokeError}
+        onCancel={() => {
+          if (revoking) return;
+          setPendingRevoke(null);
+          setRevokeError(null);
+        }}
+        onConfirm={() => {
+          if (pendingRevoke) void revokeToken(pendingRevoke);
+        }}
+      />
+    </>
   );
 }
 

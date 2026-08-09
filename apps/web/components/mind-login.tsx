@@ -43,7 +43,7 @@ export function MindLogin({ callbackPath = "/" }: { callbackPath?: string }) {
   );
 }
 
-export function MindAccessDenied({ email }: { email: string }) {
+export function MindAccessBlocked({ email }: { email: string }) {
   const [loggingOut, setLoggingOut] = useState(false);
 
   async function logout() {
@@ -56,8 +56,8 @@ export function MindAccessDenied({ email }: { email: string }) {
     <main className="auth-page auth-page--centered">
       <section className="mind-login">
         <h1>Mind</h1>
-        <p className="auth-intro"><strong>{email}</strong> does not have access yet.</p>
-        <p className="auth-message">Add this address to MIND_ALLOWED_EMAILS in Vercel, then redeploy.</p>
+        <p className="auth-intro"><strong>{email}</strong> has been blocked from Mind.</p>
+        <p className="auth-message">Contact the administrator if you believe this was a mistake.</p>
         <button className="google-sign-in" type="button" onClick={() => void logout()} disabled={loggingOut}>
           {loggingOut ? <LoaderCircle className="spin" size={18} /> : <LogOut size={18} />}
           Sign out
