@@ -1,11 +1,12 @@
 import { and, asc, desc, eq, ilike, inArray, or, type SQL } from "drizzle-orm";
 import { getDatabase } from "@/db";
 import { inspirationTags, inspirations, tags as tagsTable } from "@/db/schema";
-import type {
-  CreateInspirationInput,
-  Inspiration,
-  InspirationListInput,
-  UpdateInspirationInput
+import {
+  maximumInspirationNoteLength,
+  type CreateInspirationInput,
+  type Inspiration,
+  type InspirationListInput,
+  type UpdateInspirationInput
 } from "@/lib/inspirations";
 import { normalizeUrl } from "@/nextsignal/services/link-metadata";
 
@@ -13,6 +14,11 @@ export type CreateInspirationRecordResult = {
   inspiration: Inspiration;
   duplicate: boolean;
 };
+
+export type AnnotateCaptureResult =
+  | { status: "updated"; inspiration: Inspiration }
+  | { status: "notFound" }
+  | { status: "noteTooLong" };
 
 export const inspirationService = {
   async list(ownerId: string, input: InspirationListInput): Promise<Inspiration[]> {
@@ -149,6 +155,26 @@ export const inspirationService = {
     return readById(ownerId, input.id);
   },
 
+  async annotateCapture(
+    ownerId: string,
+    id: string,
+    input: { note?: string; tags?: string[] }
+  ): Promise<AnnotateCaptureResult> {
+    const existing = await readById(ownerId, id);
+    if (!existing) return { status: "notFound" };
+
+    const update: UpdateInspirationInput = { id };
+    if (input.note) {
+      const merged = appendCaptureNote(existing.note, input.note);
+      if (!merged.ok) return { status: "noteTooLong" };
+      update.note = merged.note;
+    }
+    if (input.tags?.length) update.tags = [...existing.tags, ...input.tags];
+
+    const inspiration = await inspirationService.update(ownerId, update);
+    return inspiration ? { status: "updated", inspiration } : { status: "notFound" };
+  },
+
   async delete(ownerId: string, id: string) {
     const db = await getDatabase();
     const [existing] = await db
@@ -162,6 +188,18 @@ export const inspirationService = {
     return existing;
   }
 };
+
+export function appendCaptureNote(existing: string | null, addition: string) {
+  const cleaned = addition.trim();
+  if (!existing) return { ok: true as const, note: cleaned };
+  if (existing === cleaned || existing.endsWith(`\n\n${cleaned}`)) {
+    return { ok: true as const, note: existing };
+  }
+
+  const note = `${existing}\n\n${cleaned}`;
+  if (note.length > maximumInspirationNoteLength) return { ok: false as const };
+  return { ok: true as const, note };
+}
 
 async function readById(ownerId: string, id: string) {
   const db = await getDatabase();

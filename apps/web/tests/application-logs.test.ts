@@ -4,13 +4,16 @@ import { sanitizeLogText } from "@/nextsignal/services/application-logs";
 describe("application log sanitization", () => {
   it("redacts extension and bearer tokens", () => {
     const value = sanitizeLogText(
-      "Bearer abc.def_123 and mind_ext_abcdefghijklmnopqrstuvwxyz123456"
+      "Bearer abc.def_123, mind_ext_abcdefghijklmnopqrstuvwxyz123456, and " +
+      "mind_capture_abcdefghijklmnopqrstuvwxyz12345678901234567"
     );
 
     expect(value).not.toContain("abc.def_123");
     expect(value).not.toContain("mind_ext_abcdefghijklmnopqrstuvwxyz123456");
+    expect(value).not.toContain("mind_capture_abcdefghijklmnopqrstuvwxyz12345678901234567");
     expect(value).toContain("Bearer [redacted]");
     expect(value).toContain("[redacted-extension-token]");
+    expect(value).toContain("[redacted-capture-receipt]");
   });
 
   it("redacts passwords embedded in Postgres URLs", () => {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { maximumInspirationTitleLength, normalizeInspirationTitle } from "@/lib/inspirations";
 import {
   createInspirationSchema,
+  extensionCaptureAnnotationSchema,
   extensionCaptureSchema,
   listInspirationsSchema,
   setUserBlockedSchema
@@ -35,6 +36,23 @@ describe("extensionCaptureSchema", () => {
     const normalized = normalizeInspirationTitle(pageTitle);
     expect(normalized).toHaveLength(maximumInspirationTitleLength);
     expect(normalized?.endsWith("…")).toBe(true);
+  });
+});
+
+describe("extensionCaptureAnnotationSchema", () => {
+  const receipt = `mind_capture_${"a".repeat(43)}`;
+
+  it("accepts an optional note, labels, or both for a recent capture", () => {
+    expect(extensionCaptureAnnotationSchema.safeParse({ receipt, note: "Read this again" }).success).toBe(true);
+    expect(extensionCaptureAnnotationSchema.safeParse({ receipt, tags: ["reading"] }).success).toBe(true);
+    expect(extensionCaptureAnnotationSchema.safeParse({ receipt, note: "Useful", tags: ["design"] }).success)
+      .toBe(true);
+  });
+
+  it("rejects empty annotations and malformed receipts", () => {
+    expect(extensionCaptureAnnotationSchema.safeParse({ receipt }).success).toBe(false);
+    expect(extensionCaptureAnnotationSchema.safeParse({ receipt: "not-a-receipt", note: "Useful" }).success)
+      .toBe(false);
   });
 });
 

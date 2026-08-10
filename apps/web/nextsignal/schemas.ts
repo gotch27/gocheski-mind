@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { extensionCaptureTypes } from "@gocheski-mind/contracts";
-import { inspirationKinds, maximumInspirationTitleLength } from "@/lib/inspirations";
+import {
+  inspirationKinds,
+  maximumInspirationNoteLength,
+  maximumInspirationTitleLength
+} from "@/lib/inspirations";
 
 export const extensionErrorReportSchema = z.object({
   source: z.string().trim().min(1).max(120),
@@ -36,6 +40,16 @@ export const extensionCaptureSchema = z
     }
   });
 
+export const extensionCaptureAnnotationSchema = z
+  .object({
+    receipt: z.string().regex(/^mind_capture_[A-Za-z0-9_-]{43}$/),
+    note: z.string().trim().min(1).max(maximumInspirationNoteLength).optional(),
+    tags: tagsSchema
+  })
+  .refine((input) => Boolean(input.note || input.tags?.length), {
+    message: "Add a note or at least one label before saving."
+  });
+
 export const createInspirationSchema = z
   .object({
     kind: z.enum(inspirationKinds),
@@ -45,7 +59,7 @@ export const createInspirationSchema = z
     imageUrl: optionalUrl,
     blobPathname: z.string().trim().max(1_000).optional(),
     mimeType: z.string().trim().max(120).optional(),
-    note: z.string().trim().max(4_000).optional(),
+    note: z.string().trim().max(maximumInspirationNoteLength).optional(),
     tags: tagsSchema,
     metadata: z
       .object({
@@ -83,7 +97,7 @@ export const updateInspirationSchema = z
     title: optionalShortText,
     content: optionalLongText,
     sourceUrl: optionalUrl,
-    note: z.string().trim().max(4_000).optional(),
+    note: z.string().trim().max(maximumInspirationNoteLength).optional(),
     tags: tagsSchema,
     favorite: z.boolean().optional()
   })

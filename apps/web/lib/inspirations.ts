@@ -1,5 +1,6 @@
 export const inspirationKinds = ["link", "image", "note", "quote"] as const;
 export const maximumInspirationTitleLength = 240;
+export const maximumInspirationNoteLength = 4_000;
 
 export type InspirationKind = (typeof inspirationKinds)[number];
 

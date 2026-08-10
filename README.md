@@ -12,7 +12,7 @@ packages/
   contracts/    Types shared by the web app and extension
 ```
 
-The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob. The extension uses a background service worker and Chrome's context-menu API. It has no always-running content script or access to every website; it injects only a temporary status toast after an explicit capture action.
+The web app uses Next.js, `@gotch/nextsignal`, Neon Postgres, Drizzle, and Vercel Blob. The extension uses a background service worker and Chrome's context-menu API. It has no always-running content script or access to every website; it injects only a temporary capture panel after an explicit capture action.
 
 ## Local web setup
 
@@ -55,7 +55,7 @@ Then:
 
 The published Chrome Web Store extension (`ecnghadaoncoimohifncimlgpacnicom`) supports automatic setup: click **Connect to Mind** in its popup, sign in on the website, review the capture disclosure, and approve the connection. Unpacked builds have a different extension ID, so manual key entry remains available for local development.
 
-Right-click a page, link, text selection, or image and choose **Save to Mind**. A temporary toast on the current page reports saving, success, duplicate, or error status. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
+Right-click a page, link, text selection, or image and choose **Save to Mind**. The inspiration is saved immediately, then a temporary panel offers optional label and note fields. If untouched it closes after five seconds; interacting with either field pauses dismissal and reveals a single **Save** action for those details. Pages and links become link cards, selected text becomes a quote, and images are downloaded by the server and copied into Vercel Blob so they do not depend on the original host remaining available.
 
 ## Vercel
 
@@ -93,7 +93,7 @@ WHERE owner_id IS NULL;
 COMMIT;
 ```
 
-The Chrome extension does not receive the Google session. Each browser receives a random, revocable capture key from the web app, either through the Web Store connection page or through manual setup. Only its SHA-256 hash is stored in Postgres, and the key is accepted only by `POST /api/extension/captures`. The production connection page can message only the published Web Store extension, and the extension accepts setup messages only from the exact `https://www.gocheski.com/mind/extension/connect` page.
+The Chrome extension does not receive the Google session. Each browser receives a random, revocable capture key from the web app, either through the Web Store connection page or through manual setup. Only its SHA-256 hash is stored in Postgres. The key creates captures through `POST /api/extension/captures`; each response also issues a random, ten-minute receipt tied to that exact inspiration and extension key. `PATCH /api/extension/captures` requires both credentials and can only add a note or labels to that specific recent capture. The production connection page can message only the published Web Store extension, and the extension accepts setup messages only from the exact `https://www.gocheski.com/mind/extension/connect` page.
 
 Remote image capture accepts public HTTP(S) JPEG, PNG, WebP, GIF, or AVIF files up to 25 MB. Private network addresses and unsafe redirects are rejected.
 

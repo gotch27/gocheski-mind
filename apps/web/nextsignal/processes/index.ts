@@ -4,7 +4,10 @@ import {
   listInspirationsApi,
   updateInspirationApi
 } from "@/nextsignal/processes/api/inspirations";
-import { captureFromExtensionApi } from "@/nextsignal/processes/api/extension-captures";
+import {
+  annotateExtensionCaptureApi,
+  captureFromExtensionApi
+} from "@/nextsignal/processes/api/extension-captures";
 import {
   createExtensionTokenApi,
   listExtensionTokensApi,
@@ -17,7 +20,10 @@ import {
   listInspirationsBusiness,
   updateInspirationBusiness
 } from "@/nextsignal/processes/business/inspirations";
-import { captureFromExtensionBusiness } from "@/nextsignal/processes/business/extension-captures";
+import {
+  annotateExtensionCaptureBusiness,
+  captureFromExtensionBusiness
+} from "@/nextsignal/processes/business/extension-captures";
 import {
   createExtensionTokenBusiness,
   listExtensionTokensBusiness,
@@ -36,6 +42,7 @@ export const processes = [
   setAdminUserBlockedApi,
   reportExtensionErrorApi,
   captureFromExtensionApi,
+  annotateExtensionCaptureApi,
   listExtensionTokensApi,
   createExtensionTokenApi,
   revokeExtensionTokenApi,
@@ -44,6 +51,7 @@ export const processes = [
   updateInspirationApi,
   deleteInspirationApi,
   captureFromExtensionBusiness,
+  annotateExtensionCaptureBusiness,
   listExtensionTokensBusiness,
   createExtensionTokenBusiness,
   revokeExtensionTokenBusiness,

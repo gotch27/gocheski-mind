@@ -83,7 +83,7 @@ export function ExtensionConnect({ email }: { email: string }) {
         <p className="connect-account">Signed in as <strong>{email}</strong></p>
         <p>
           When you choose <strong>Save to Mind</strong>, the extension sends only the page, link, image,
-          selected text, and labels you explicitly save to your Mind account.
+          selected text, personal notes, and labels you explicitly save to your Mind account.
         </p>
 
         <label className="connect-consent">

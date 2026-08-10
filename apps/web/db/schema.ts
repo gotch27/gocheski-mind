@@ -97,6 +97,28 @@ export const extensionTokens = pgTable(
   ]
 );
 
+export const extensionCaptureReceipts = pgTable(
+  "extension_capture_receipts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    ownerId: text("owner_id").notNull(),
+    inspirationId: uuid("inspiration_id")
+      .notNull()
+      .references(() => inspirations.id, { onDelete: "cascade" }),
+    extensionTokenId: uuid("extension_token_id")
+      .notNull()
+      .references(() => extensionTokens.id, { onDelete: "cascade" }),
+    receiptHash: varchar("receipt_hash", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => [
+    uniqueIndex("extension_capture_receipts_hash_unique").on(table.receiptHash),
+    index("extension_capture_receipts_expires_at_idx").on(table.expiresAt),
+    index("extension_capture_receipts_token_created_at_idx").on(table.extensionTokenId, table.createdAt)
+  ]
+);
+
 export const inspirationTags = pgTable(
   "inspiration_tags",
   {

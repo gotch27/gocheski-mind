@@ -52,7 +52,7 @@ export const extensionTokenService = {
     if (!record) return null;
 
     await db.update(extensionTokens).set({ lastUsedAt: new Date() }).where(eq(extensionTokens.id, record.id));
-    return { ownerId: record.ownerId };
+    return { ownerId: record.ownerId, tokenId: record.id };
   }
 };
 

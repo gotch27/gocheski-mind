@@ -18,6 +18,20 @@ export type ExtensionCaptureResponse = {
     title: string | null;
   };
   duplicate: boolean;
+  annotationReceipt?: string;
+};
+
+export type ExtensionCaptureAnnotationInput = {
+  receipt: string;
+  note?: string;
+  tags?: string[];
+};
+
+export type ExtensionCaptureAnnotationResponse = {
+  inspiration: {
+    id: string;
+    title: string | null;
+  };
 };
 
 export type ExtensionErrorReport = {

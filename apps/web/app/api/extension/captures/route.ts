@@ -5,3 +5,4 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export const POST = createLoggedNextRoute(app, "extension.capture");
+export const PATCH = createLoggedNextRoute(app, "extension.annotateCapture");

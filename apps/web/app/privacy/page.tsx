@@ -10,7 +10,7 @@ export default function PrivacyPage() {
     <main className="privacy-page">
       <article className="privacy-document">
         <a className="auth-home-link" href="/">Gocheski</a>
-        <p className="eyebrow">Last updated August 6, 2026</p>
+        <p className="eyebrow">Last updated August 10, 2026</p>
         <h1>Gocheski Mind privacy policy</h1>
         <p className="privacy-lead">
           Gocheski Mind is a personal inspiration board. Its Chrome extension saves content only when you explicitly
@@ -22,7 +22,8 @@ export default function PrivacyPage() {
           <p>
             When you sign in, we receive basic Google account information needed to identify your account, such as
             your name, email address, profile image, and authentication identifiers. When you save something, we may
-            receive the page URL and title, a link URL, an image or image URL, selected text, and labels you provide.
+            receive the page URL and title, a link URL, an image or image URL, selected text, personal notes, and
+            labels you provide.
           </p>
           <p>
             The extension stores its revocable access token and your optional default labels locally in Chrome. It

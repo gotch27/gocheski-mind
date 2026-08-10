@@ -14,7 +14,7 @@ export type ApplicationLogInput = {
   context?: unknown;
 };
 
-const sensitiveKey = /authorization|cookie|password|secret|token|credential|session|verifier/i;
+const sensitiveKey = /authorization|cookie|password|secret|token|credential|session|verifier|receipt/i;
 
 export const applicationLogService = {
   async record(input: ApplicationLogInput) {
@@ -82,6 +82,7 @@ export function sanitizeLogText(value: string, maximum = 2_000) {
     value
       .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]+/gi, "Bearer [redacted]")
       .replace(/\bmind_ext_[A-Za-z0-9_-]{20,}/g, "[redacted-extension-token]")
+      .replace(/\bmind_capture_[A-Za-z0-9_-]{20,}/g, "[redacted-capture-receipt]")
       .replace(/(postgres(?:ql)?:\/\/[^:\s/]+:)[^@\s/]+@/gi, "$1[redacted]@"),
     maximum
   );
