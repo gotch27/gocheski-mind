@@ -435,6 +435,18 @@ kbd {
   column-gap: 18px;
 }
 
+.masonry.sparse {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 275px), 1fr));
+  gap: 18px;
+}
+
+.masonry.sparse .inspiration-card {
+  max-width: 360px;
+  margin-bottom: 0;
+  justify-self: center;
+}
+
 .inspiration-card {
   position: relative;
   display: inline-block;

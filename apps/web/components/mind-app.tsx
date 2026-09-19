@@ -353,7 +353,7 @@ export function MindApp({ user }: MindAppProps) {
           )}
         </section>
       ) : (
-        <section className="masonry" aria-live="polite">
+        <section className={items.length <= 4 ? "masonry sparse" : "masonry"} aria-live="polite">
           {items.map((item) => (
             <InspirationCard
               key={item.id}
